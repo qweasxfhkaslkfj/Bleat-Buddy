@@ -1,36 +1,39 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Media;
 using System.Windows.Forms;
 
 namespace Bleat_Buddy 
 {
     internal class Goat : UserControl
     {
-        private static string gameDirectory = Directory.GetCurrentDirectory();
+        Button goat = new Button();
+        int speed;
         // Текстуры козла
         static string projectRoot = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\..\"));
         private Image goatRight_Texture = Image.FromFile(Path.Combine(projectRoot, "resurse", "textureRight.png"));
         private Image goatLeft_Texture = Image.FromFile(Path.Combine(projectRoot, "resurse", "textureLeft.png"));
-        Button goat = new Button();
-        private int level;
-        int speed;
-        // Словарь возраст - текстура козла
-        private Dictionary<string, string> goatTypes = new Dictionary<string, string>
-        {
-            { "little", "littleGoat.png"},
-            { "teenager", "teenagerGoat.png"},
-            { "adult", "adultGoat.png"},
-            { "elderly", "elderlyGoat.png"}
-        };
+        // Блеяние
+        private string audioPath = Path.Combine(projectRoot, "resurse", "bleat.wav");
+        // Прыжок
+        private Timer jumpTimer;
+        private int jumpHeight = 100;
+        private int jumpSpeed = 5;
+        private int currentJumpStep = 0;
+        private bool isJumping = false;
+        private int startY;
+        private int jumpCount = 0;
+        private bool doubleJump = false;
 
         // Конструктор класса
         public Goat()
         {
             this.speed = 10;
+            jumpTimer = new Timer();
+            jumpTimer.Interval = 25;
+            jumpTimer.Tick += JumpAnimation;
         }
-
         // Создание кнопки-козла
         public Button CreateGoat(Point location)
         {
@@ -45,6 +48,7 @@ namespace Bleat_Buddy
             return goat;
         }
 
+        // ToDo: добавить анимации
         // Обработка движения козла
         public void Goat_Movemant(Button goatBtn, KeyEventArgs e)
         {
@@ -74,6 +78,81 @@ namespace Bleat_Buddy
                         break;
                     }
                     break;
+                case Keys.Space:
+                    Jump();
+                    break;
+                case Keys.W:
+                    Butting();
+                    break;
+                case Keys.Q:
+                    Bleating();
+                    break;
+            }
+
+        }
+        // ToDo: добавить движение влево-вправо во время прыжка
+        // Прыжок
+        private void Jump()
+        {
+            // Первый прыжок
+            if (!isJumping)
+            {
+                startY = goat.Location.Y;
+                currentJumpStep = 0;
+                isJumping = true;
+                jumpCount = 1;
+                doubleJump = true;
+                jumpTimer.Start();
+            }
+            // Второй прыжок
+            else if (doubleJump && jumpCount == 1)
+            {
+                startY = goat.Location.Y;
+                currentJumpStep = 0;
+                jumpCount = 2;
+                doubleJump = false;
+            }
+        }
+        // Плавный прыжок
+        private void JumpAnimation(object sender, EventArgs e)
+        {
+            float progress = (float)currentJumpStep / jumpHeight;
+            float p = 4 * progress * (1 - progress);
+
+            int newY = startY - (int)(p * jumpHeight);
+            goat.Location = new Point(goat.Location.X, newY);
+
+            currentJumpStep += jumpSpeed;
+
+            if (currentJumpStep > jumpHeight)
+            {
+                jumpTimer.Stop();
+                isJumping = false;
+                jumpCount = 0;
+                doubleJump = false;
+                goat.Location = new Point(goat.Location.X, startY);
+            }
+        }
+
+        // Бадание
+        private void Butting()
+        {
+            goat.Location = new Point(goat.Location.X + 30, goat.Location.Y);
+        }
+        // Блеяние
+        private void Bleating()
+        {
+            if (File.Exists(audioPath))
+            {
+                var soundPlayer = new SoundPlayer(audioPath);
+                try
+                {
+                    soundPlayer.Play();
+                }
+                finally
+                {
+                    soundPlayer.Dispose();
+                }
             }
         }
     }

@@ -21,14 +21,6 @@ namespace Bleat_Buddy
             this.Bounds = Screen.PrimaryScreen.Bounds;
             mainMenu();
         }
-        // Обработчик Нажатия на клавишу
-        private void Form1_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (currentGame != null)
-                currentGame.KeyPress(e);
-        }
-
-
         // Главное меню
         public void mainMenu()
         {
@@ -73,7 +65,6 @@ namespace Bleat_Buddy
             Controls.Add(gameName);
         }
 
-
         // Кнопка начать игру
         private void StartBtn_Click(object sender, EventArgs e)
         {
@@ -107,6 +98,12 @@ namespace Bleat_Buddy
             {
                 Application.Exit();
             }
+        }
+        // Обработчик Нажатия на клавишу
+        private void Form1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (currentGame != null)
+                currentGame.KeyPress(e);
         }
     }
 }
