@@ -1,27 +1,52 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 
 namespace Bleat_Buddy
 {
     internal class Gameplay : UserControl
     {
-        Goat goat = new Goat();
-        private Button goatBtn;
+        private PictureBox goatSprite;
         private Timer fallTimer;
-        public Button a = CreatePlatform(0, 991, 750, 150);
-        public Button b = CreatePlatform(900, 991, 1920, 150);
+        private Timer nearnessTimer;
+        Goat goat = new Goat();
+        Fire fire = new Fire();
+        public PictureBox a = CreatePlatform(0, 991, 750, 150);
+        public PictureBox b = CreatePlatform(900, 991, 1920, 150);
 
         public Gameplay()
         {
             InitializeFallTimer();
+            //InitializeNearnessTimer();
         }
 
         public void FirstScreen()
         {
-            Controls.Add(a);
-            Controls.Add(b);
-            goatBtn = goat.CreateGoat(new Point(90, 900));
-            Controls.Add(goatBtn);
+            //Controls.Add(a);
+            //Controls.Add(b);
+            //PictureBox fireBox = fire.CreateFire(450, 900);
+            //Controls.Add(fireBox);
+            //fireBox.SendToBack();
+
+            //goatSprite = goat.CreateGoat(new Point(90, 900));
+            //Controls.Add(goatSprite);
+            //goatSprite.BringToFront();
+            //a.SendToBack();
+            //b.SendToBack();
+
+            fallTimer.Start();
+
+            Fire fire = new Fire();
+            fire.Dock = DockStyle.Fill;
+            Controls.Add(fire);
+
+            fire.FireScreen();
+
+            goatSprite = goat.CreateGoat(new Point(90, 900));
+            Controls.Add(goatSprite);
+            goatSprite.BringToFront();
+
             fallTimer.Start();
         }
 
@@ -37,20 +62,44 @@ namespace Bleat_Buddy
             Falling();
         }
 
+        // Таймер для проверки близости к костру
+        private void InitializeNearnessTimer()
+        {
+            nearnessTimer = new Timer();
+            nearnessTimer.Interval = 100;
+            nearnessTimer.Tick += NearnessTimer_Tick;
+        }
+
+        private void NearnessTimer_Tick(object sender, EventArgs e)
+        {
+            CheckFireNearness();
+        }
+
+        private void CheckFireNearness()
+        {
+            int fireX = 450;
+            int fireY = 900;
+
+            int goatX = goatSprite.Left;
+            int goatY = goatSprite.Top;
+
+            fire.IsNear(goatX, goatY, fireX, fireY);
+        }
+
         // Падение
         public void Falling()
         {
-            if (!IsOnPlatform(goatBtn, a) && !IsOnPlatform(goatBtn, b))
+            if (!IsOnPlatform(goatSprite, a) && !IsOnPlatform(goatSprite, b))
             {
-                goatBtn.Top += 10;
+                goatSprite.Top += 10;
             }
-            if (goatBtn.Top == 1080)
+            if (goatSprite.Top == 1080)
             {
                 End();
             }
         }
         // Проверка нахождения на платформе
-        private bool IsOnPlatform(Button goat, Button platform)
+        private bool IsOnPlatform(PictureBox goat, PictureBox platform)
         {
             return goat.Bottom >= platform.Top &&
                    goat.Bottom <= platform.Bottom &&
@@ -58,12 +107,13 @@ namespace Bleat_Buddy
                    goat.Left < platform.Right;
         }
         // Создание платформ
-        private static Button CreatePlatform(int x, int y, int w, int h)
+        private static PictureBox CreatePlatform(int x, int y, int w, int h)
         {
-            Button platform = new Button();
+            PictureBox platform = new PictureBox();
             platform.Location = new Point(x, y);
             platform.Size = new Size(w, h);
             platform.Visible = true;
+            platform.BackColor = Color.Green;
             return platform;
         }
 
@@ -133,7 +183,7 @@ namespace Bleat_Buddy
         // Нажатие на кнопки
         public void KeyPress(KeyEventArgs e)
         {
-            goat.Goat_Movemant(goatBtn, e);
+            goat.Goat_Movemant(goatSprite, e);
         }
         public void EscapeButton(KeyEventArgs e)
         {

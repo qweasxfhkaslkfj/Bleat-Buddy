@@ -8,10 +8,10 @@ namespace Bleat_Buddy
 {
     internal class Goat : UserControl
     {
-        Button goat = new Button();
+        PictureBox goat;
         int speed;
         // Текстуры козла
-        static string projectRoot = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\..\"));
+        private static string projectRoot = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\..\"));
         private Image goatRight_Texture = Image.FromFile(Path.Combine(projectRoot, "resurse", "textureRight.png"));
         private Image goatLeft_Texture = Image.FromFile(Path.Combine(projectRoot, "resurse", "textureLeft.png"));
         // Блеяние
@@ -25,6 +25,15 @@ namespace Bleat_Buddy
         private int startY;
         private int jumpCount = 0;
         private bool doubleJump = false;
+        // Базовые показатели 
+        public int energyPoint = 50;
+        public int healthPoint = 2;
+        public int dirtPoint = 0;
+        public int medCount = 0;
+        public int crystalsCount = 1;
+        public bool isSick = false;
+        public int level;
+
 
         // Конструктор класса
         public Goat()
@@ -35,22 +44,19 @@ namespace Bleat_Buddy
             jumpTimer.Tick += JumpAnimation;
         }
         // Создание кнопки-козла
-        public Button CreateGoat(Point location)
+        public PictureBox CreateGoat(Point location)
         {
-            goat= new Button();
+            goat = new PictureBox();
             goat.Size = new Size(90, 90);
             goat.Location = location;
-            goat.BackColor = this.BackColor;
             goat.BackgroundImage = goatRight_Texture;
             goat.BackgroundImageLayout = ImageLayout.Stretch;
-            goat.FlatStyle = FlatStyle.Flat;
-            goat.FlatAppearance.BorderSize = 0;
             return goat;
         }
 
         // ToDo: добавить анимации
         // Обработка движения козла
-        public void Goat_Movemant(Button goatBtn, KeyEventArgs e)
+        public void Goat_Movemant(PictureBox goatBtn, KeyEventArgs e)
         {
             int leftBound = goatBtn.Left;
 
@@ -62,8 +68,6 @@ namespace Bleat_Buddy
                         goatBtn.Left -= speed;
                         goat.BackgroundImage = goatLeft_Texture;
                         goat.BackgroundImageLayout = ImageLayout.Stretch;
-                        goat.FlatStyle = FlatStyle.Flat;
-                        goat.FlatAppearance.BorderSize = 0;
                         break;
                     }
                     break;
@@ -73,8 +77,6 @@ namespace Bleat_Buddy
                         goatBtn.Left += speed;
                         goat.BackgroundImage = goatRight_Texture;
                         goat.BackgroundImageLayout = ImageLayout.Stretch;
-                        goat.FlatStyle = FlatStyle.Flat;
-                        goat.FlatAppearance.BorderSize = 0;
                         break;
                     }
                     break;
