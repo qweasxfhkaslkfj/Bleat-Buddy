@@ -10,7 +10,8 @@ namespace Bleat_Buddy
     {
         private static string projectRoot = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\..\"));
         private Image fire_Texture = Image.FromFile(Path.Combine(projectRoot, "resurse", "fire.png"));
-        private Button firstBtn, secondBtn, thirdBtn, fourthBtn, fifthBtn, exitBtn;
+        private Gameplay gameplay;
+        Button firstBtn, secondBtn, thirdBtn, fourthBtn, fifthBtn, exitBtn;
         Goat goat = new Goat();
 
         public PictureBox CreateFire(int x, int y)
@@ -25,10 +26,6 @@ namespace Bleat_Buddy
         }
         public void FireScreen()
         {
-            // Создание козла
-            PictureBox goatSprite = goat.CreateGoat(new Point(90, 900));
-            Controls.Add(goatSprite);
-
             // Пол
             PictureBox floor = new PictureBox();
             floor.Location = new Point(0, 991);
@@ -79,13 +76,14 @@ namespace Bleat_Buddy
             clothesBtn.Click += ClothesBtn_Click;
             Controls.Add(clothesBtn);
         }
+        public void SetGameplayReference(Gameplay game)
+        {
+            gameplay = game;
+        }
 
         public void IsNear(int goatX, int goatY, int fireX, int fireY)
         {
-            if (Math.Abs(goatX - fireX) <= 50 && Math.Abs(goatY - fireY) <= 50)
-            {
-                MessageBox.Show("Вы рядом с костром");
-            }
+            FireScreen();
         }
 
         // ВРЕМЕННЫЙ ИНТЕРФЕЙС сна
@@ -117,6 +115,7 @@ namespace Bleat_Buddy
                     if (result == DialogResult.Yes)
                     {
                         goat.healthPoint = 3;
+                        goat.crystalsCount--;
                         MessageBox.Show("Козлик теперь сытый!");
                     }
                 }
@@ -142,6 +141,7 @@ namespace Bleat_Buddy
                     if (result == DialogResult.Yes)
                     {
                         goat.medCount = 3;
+                        goat.crystalsCount--;
                         MessageBox.Show("У вас теперь 3 лекарства!");
                     }
                 }
@@ -172,6 +172,11 @@ namespace Bleat_Buddy
         // ВРЕМЕННЫЙ ИНТЕРФЕЙС гардероба
         private void ClothesBtn_Click(object sender, EventArgs e)
         {
+            if (gameplay != null)
+            {
+                gameplay.HideGoat();
+            }
+
             Controls.Clear();
             int level = goat.level;
             PictureBox goatSuit = new PictureBox();
@@ -223,6 +228,13 @@ namespace Bleat_Buddy
 
         private void GoatSuitsBtns()
         {
+            firstBtn = new Button();
+            secondBtn = new Button();
+            thirdBtn = new Button();
+            fourthBtn = new Button();
+            fifthBtn = new Button();
+            exitBtn = new Button();
+
             // ПЕРВЫЙ костюм
             firstBtn.Location = new Point(494, 53);
             firstBtn.Size = new Size(190, 80);
@@ -262,7 +274,7 @@ namespace Bleat_Buddy
             // Кнопка выхода
             exitBtn.Location = new Point(12, 12);
             exitBtn.Size = new Size(51, 63);
-            exitBtn.Text = "ПЯТЫЙ";
+            exitBtn.Text = "ВЫХОД";
             exitBtn.Visible = true;
             exitBtn.Click += ExitBtn_Click;
             Controls.Add(exitBtn);
@@ -289,6 +301,11 @@ namespace Bleat_Buddy
         }
         private void ExitBtn_Click(object sender, EventArgs e)
         {
+            if (gameplay != null)
+            {
+                gameplay.ShowGoat();
+            }
+
             Controls.Clear();
             FireScreen();
         }

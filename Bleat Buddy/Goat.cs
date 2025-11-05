@@ -2,12 +2,16 @@
 using System.Drawing;
 using System.IO;
 using System.Media;
+using System.Threading;
 using System.Windows.Forms;
+using System.Threading.Tasks;
 
 namespace Bleat_Buddy 
 {
     internal class Goat : UserControl
     {
+        // ToDo: Вывести базовые показатели и возможность их изменения
+
         PictureBox goat;
         int speed;
         // Текстуры козла
@@ -17,14 +21,7 @@ namespace Bleat_Buddy
         // Блеяние
         private string audioPath = Path.Combine(projectRoot, "resurse", "bleat.wav");
         // Прыжок
-        private Timer jumpTimer;
-        private int jumpHeight = 100;
-        private int jumpSpeed = 5;
-        private int currentJumpStep = 0;
-        private bool isJumping = false;
-        private int startY;
-        private int jumpCount = 0;
-        private bool doubleJump = false;
+        //private Timer jumpTimer;
         // Базовые показатели 
         public int energyPoint = 50;
         public int healthPoint = 2;
@@ -32,18 +29,15 @@ namespace Bleat_Buddy
         public int medCount = 0;
         public int crystalsCount = 1;
         public bool isSick = false;
-        public int level;
+        public int level = 2;
 
 
         // Конструктор класса
         public Goat()
         {
             this.speed = 10;
-            jumpTimer = new Timer();
-            jumpTimer.Interval = 25;
-            jumpTimer.Tick += JumpAnimation;
         }
-        // Создание кнопки-козла
+        // Создание козла
         public PictureBox CreateGoat(Point location)
         {
             goat = new PictureBox();
@@ -92,47 +86,26 @@ namespace Bleat_Buddy
             }
 
         }
-        // ToDo: добавить движение влево-вправо во время прыжка
+
+        // ToDo:
+        //       + Добавить двойной прыжок
+        //       + добавить движение влево-вправо во время прыжка
         // Прыжок
         private void Jump()
         {
-            // Первый прыжок
-            if (!isJumping)
+            int originalY = goat.Location.Y;
+            int jumpSteps = 20;
+
+            for (int i = 0; i < jumpSteps; i++)
             {
-                startY = goat.Location.Y;
-                currentJumpStep = 0;
-                isJumping = true;
-                jumpCount = 1;
-                doubleJump = true;
-                jumpTimer.Start();
+                goat.Top -= 5;
+                Thread.Sleep(5);
             }
-            // Второй прыжок
-            else if (doubleJump && jumpCount == 1)
+
+            for (int i = 0; i < jumpSteps; i++)
             {
-                startY = goat.Location.Y;
-                currentJumpStep = 0;
-                jumpCount = 2;
-                doubleJump = false;
-            }
-        }
-        // Плавный прыжок
-        private void JumpAnimation(object sender, EventArgs e)
-        {
-            float progress = (float)currentJumpStep / jumpHeight;
-            float p = 4 * progress * (1 - progress);
-
-            int newY = startY - (int)(p * jumpHeight);
-            goat.Location = new Point(goat.Location.X, newY);
-
-            currentJumpStep += jumpSpeed;
-
-            if (currentJumpStep > jumpHeight)
-            {
-                jumpTimer.Stop();
-                isJumping = false;
-                jumpCount = 0;
-                doubleJump = false;
-                goat.Location = new Point(goat.Location.X, startY);
+                goat.Top += 5;
+                Thread.Sleep(5);
             }
         }
 

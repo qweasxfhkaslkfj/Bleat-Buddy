@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Drawing;
-using System.IO;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace Bleat_Buddy
@@ -8,52 +8,58 @@ namespace Bleat_Buddy
     internal class Gameplay : UserControl
     {
         private PictureBox goatSprite;
-        private Timer fallTimer;
-        private Timer nearnessTimer;
+        private System.Windows.Forms.Timer fallTimer;
+        private System.Windows.Forms.Timer nearnessTimer;
         Goat goat = new Goat();
         Fire fire = new Fire();
         public PictureBox a = CreatePlatform(0, 991, 750, 150);
         public PictureBox b = CreatePlatform(900, 991, 1920, 150);
+        int messCount = 1;
 
         public Gameplay()
         {
             InitializeFallTimer();
-            //InitializeNearnessTimer();
+            InitializeNearnessTimer();
         }
 
         public void FirstScreen()
         {
-            //Controls.Add(a);
-            //Controls.Add(b);
-            //PictureBox fireBox = fire.CreateFire(450, 900);
-            //Controls.Add(fireBox);
-            //fireBox.SendToBack();
-
-            //goatSprite = goat.CreateGoat(new Point(90, 900));
-            //Controls.Add(goatSprite);
-            //goatSprite.BringToFront();
-            //a.SendToBack();
-            //b.SendToBack();
-
-            fallTimer.Start();
-
-            Fire fire = new Fire();
-            fire.Dock = DockStyle.Fill;
-            Controls.Add(fire);
-
-            fire.FireScreen();
+            Controls.Add(a);
+            Controls.Add(b);
+            PictureBox fireBox = fire.CreateFire(450, 900);
+            Controls.Add(fireBox);
+            fireBox.SendToBack();
 
             goatSprite = goat.CreateGoat(new Point(90, 900));
             Controls.Add(goatSprite);
             goatSprite.BringToFront();
+            a.SendToBack();
+            b.SendToBack();
 
             fallTimer.Start();
+            nearnessTimer.Start();
+
+            //Controls.Clear();
+            //fallTimer.Start();
+
+            //Fire fire = new Fire();
+            //fire.Dock = DockStyle.Fill;
+            //fire.SetGameplayReference(this);
+
+            //Controls.Add(fire);
+            //fire.FireScreen();
+
+            //goatSprite = goat.CreateGoat(new Point(90, 900));
+            //Controls.Add(goatSprite);
+            //goatSprite.BringToFront();
+
+            //fallTimer.Start();
         }
 
         // Таймер для падения
         private void InitializeFallTimer()
         {
-            fallTimer = new Timer();
+            fallTimer = new System.Windows.Forms.Timer();
             fallTimer.Interval = 50;
             fallTimer.Tick += FallTimer_Tick;
         }
@@ -62,20 +68,14 @@ namespace Bleat_Buddy
             Falling();
         }
 
-        // Таймер для проверки близости к костру
+        // Проверка нахождения рядом с костром
         private void InitializeNearnessTimer()
         {
-            nearnessTimer = new Timer();
-            nearnessTimer.Interval = 100;
+            nearnessTimer = new System.Windows.Forms.Timer();
+            nearnessTimer.Interval = 500;
             nearnessTimer.Tick += NearnessTimer_Tick;
         }
-
         private void NearnessTimer_Tick(object sender, EventArgs e)
-        {
-            CheckFireNearness();
-        }
-
-        private void CheckFireNearness()
         {
             int fireX = 450;
             int fireY = 900;
@@ -83,7 +83,13 @@ namespace Bleat_Buddy
             int goatX = goatSprite.Left;
             int goatY = goatSprite.Top;
 
-            fire.IsNear(goatX, goatY, fireX, fireY);
+            int distance = (int)Math.Sqrt(Math.Pow(goatX - fireX, 2) + Math.Pow(goatY - fireY, 2));
+
+            if (distance < 100)
+            {
+                fire.IsNear(goatX, goatY, fireX, fireY);
+            }
+
         }
 
         // Падение
@@ -92,9 +98,11 @@ namespace Bleat_Buddy
             if (!IsOnPlatform(goatSprite, a) && !IsOnPlatform(goatSprite, b))
             {
                 goatSprite.Top += 10;
+                Thread.Sleep(5);
             }
-            if (goatSprite.Top == 1080)
+            if (goatSprite.Top >= 1080 && messCount == 1)
             {
+                messCount = 0;
                 End();
             }
         }
@@ -163,12 +171,14 @@ namespace Bleat_Buddy
 
             if (result == DialogResult.OK)
             {
+                messCount = 1;
                 Controls.Clear();
                 Dock = DockStyle.Fill;
                 FirstScreen();
             }
             else if (result == DialogResult.Cancel)
             {
+                messCount = 1;
                 Form1 mainForm = this.Parent as Form1;
                 fallTimer.Stop();
                 Controls.Clear();
@@ -177,6 +187,22 @@ namespace Bleat_Buddy
                 {
                     mainForm.mainMenu();
                 }
+            }
+        }
+
+        // Показать/спрятать козла
+        public void HideGoat()
+        {
+            if (goatSprite != null)
+            {
+                goatSprite.Visible = false;
+            }
+        }
+        public void ShowGoat()
+        {
+            if (goatSprite != null)
+            {
+                goatSprite.Visible = true;
             }
         }
 
