@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
-using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace Bleat_Buddy
@@ -9,6 +9,7 @@ namespace Bleat_Buddy
     internal class Fire : UserControl
     {
         private static string projectRoot = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\..\"));
+        private string littleGoatFeed = Path.Combine(projectRoot, "resurse", "little-goat-Feed");
         private Image fire_Texture = Image.FromFile(Path.Combine(projectRoot, "resurse", "fire.png"));
         private Gameplay gameplay;
         Button firstBtn, secondBtn, thirdBtn, fourthBtn, fifthBtn, exitBtn;
@@ -99,7 +100,7 @@ namespace Bleat_Buddy
                 MessageBox.Show("Козлик ещё не очень устал, он не хочет спать");
             }
         }
-        // ВРЕМЕННЫЙ ИНТЕРФЕЙС кормления
+        // ВРЕМЕННАЯ РЕАЛИЗАЦИЯ кормления
         private void FeedBtn_Click(object sender, EventArgs e)
         {
             if (goat.healthPoint < 3)
@@ -110,13 +111,32 @@ namespace Bleat_Buddy
                 }
                 else
                 {
-                    DialogResult result = MessageBox.Show("Вы хотите востановить здоровье за 1 осколок кристалла?", "Еда", MessageBoxButtons.YesNo);
+                    DialogResult result = MessageBox.Show("Вы хотите восстановить здоровье за 1 осколок кристалла?", "Еда", MessageBoxButtons.YesNo);
 
                     if (result == DialogResult.Yes)
                     {
+                        int x = goat.Location.X;
+                        int y = goat.Location.Y;
+                        for (int i = 1; i < 23; i++)
+                        {
+                            PictureBox feed = new PictureBox();
+                            feed.Size = new Size(122, 138);
+                            feed.Location = new Point(x, y);
+                            feed.BackgroundImage = Image.FromFile(Path.Combine(littleGoatFeed, $"feed{i}.png"));
+                            feed.BackgroundImageLayout = ImageLayout.Stretch;
+                            feed.BringToFront();
+                            Controls.Add(feed);
+
+                            Refresh();
+                            Thread.Sleep(100);
+
+                            Controls.Remove(feed);
+                            feed.Dispose();
+                        }
                         goat.healthPoint = 3;
                         goat.crystalsCount--;
-                        MessageBox.Show("Козлик теперь сытый!");
+
+                        gameplay.UpdateHealthDisplay();
                     }
                 }
             }
@@ -124,6 +144,7 @@ namespace Bleat_Buddy
             {
                 MessageBox.Show("Козлик полностью здоров!");
             }
+
         }
         // ВРЕМЕННЫЙ ИНТЕРФЕЙС покупки лекарств
         private void MedBtn_Click(object sender, EventArgs e)
@@ -304,6 +325,7 @@ namespace Bleat_Buddy
             if (gameplay != null)
             {
                 gameplay.ShowGoat();
+                gameplay.UpdateHealthDisplay();
             }
 
             Controls.Clear();

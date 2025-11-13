@@ -4,7 +4,6 @@ using System.IO;
 using System.Media;
 using System.Threading;
 using System.Windows.Forms;
-using System.Threading.Tasks;
 
 namespace Bleat_Buddy 
 {
@@ -28,8 +27,8 @@ namespace Bleat_Buddy
         public int dirtPoint = 0;
         public int medCount = 0;
         public int crystalsCount = 1;
-        public bool isSick = false;
         public int level = 2;
+        public bool isSick = false;
 
 
         // Конструктор класса

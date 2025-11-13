@@ -8,7 +8,6 @@ C:\Users\User\source\Bleat_Buddy\Bleat Buddy\obj\Debug\Bleat Buddy.csproj.Genera
 C:\Users\User\source\Bleat_Buddy\Bleat Buddy\obj\Debug\Bleat Buddy.csproj.CoreCompileInputs.cache
 C:\Users\User\source\Bleat_Buddy\Bleat Buddy\obj\Debug\Bleat Buddy.exe
 C:\Users\User\source\Bleat_Buddy\Bleat Buddy\obj\Debug\Bleat Buddy.pdb
-C:\Users\User\source\Bleat_Buddy\Bleat Buddy\obj\Debug\Bleat Buddy.exe.config
 C:\Users\Денис\Source\Repos\Bleat-Buddy\Bleat_Buddy\Bleat Buddy\bin\Debug\Bleat Buddy.exe.config
 C:\Users\Денис\Source\Repos\Bleat-Buddy\Bleat_Buddy\Bleat Buddy\bin\Debug\Bleat Buddy.exe
 C:\Users\Денис\Source\Repos\Bleat-Buddy\Bleat_Buddy\Bleat Buddy\bin\Debug\Bleat Buddy.pdb
@@ -20,3 +19,8 @@ C:\Users\Денис\Source\Repos\Bleat-Buddy\Bleat_Buddy\Bleat Buddy\obj\Debug\B
 C:\Users\Денис\Source\Repos\Bleat-Buddy\Bleat_Buddy\Bleat Buddy\obj\Debug\Bleat Buddy.csproj.CoreCompileInputs.cache
 C:\Users\Денис\Source\Repos\Bleat-Buddy\Bleat_Buddy\Bleat Buddy\obj\Debug\Bleat Buddy.exe
 C:\Users\Денис\Source\Repos\Bleat-Buddy\Bleat_Buddy\Bleat Buddy\obj\Debug\Bleat Buddy.pdb
+C:\Users\User\source\Bleat_Buddy\Bleat Buddy\obj\Debug\Interop.MediaPlayer.dll
+C:\Users\User\source\Bleat_Buddy\Bleat Buddy\obj\Debug\Interop.WMPLib.dll
+C:\Users\User\source\Bleat_Buddy\Bleat Buddy\obj\Debug\Bleat Buddy.csproj.ResolveComReference.cache
+C:\Users\User\source\Bleat_Buddy\Bleat Buddy\obj\Debug\Bleat Buddy.exe.config
+C:\Users\User\source\Bleat_Buddy\Bleat Buddy\obj\Debug\Interop.WMPLauncher.dll

@@ -10,6 +10,7 @@ namespace Bleat_Buddy
         private PictureBox goatSprite;
         private System.Windows.Forms.Timer fallTimer;
         private System.Windows.Forms.Timer nearnessTimer;
+        private Label hpLabel;
         Goat goat = new Goat();
         Fire fire = new Fire();
         public PictureBox a = CreatePlatform(0, 991, 750, 150);
@@ -24,36 +25,38 @@ namespace Bleat_Buddy
 
         public void FirstScreen()
         {
-            Controls.Add(a);
-            Controls.Add(b);
-            PictureBox fireBox = fire.CreateFire(450, 900);
-            Controls.Add(fireBox);
-            fireBox.SendToBack();
-
-            goatSprite = goat.CreateGoat(new Point(90, 900));
-            Controls.Add(goatSprite);
-            goatSprite.BringToFront();
-            a.SendToBack();
-            b.SendToBack();
-
-            fallTimer.Start();
-            nearnessTimer.Start();
-
-            //Controls.Clear();
-            //fallTimer.Start();
-
-            //Fire fire = new Fire();
-            //fire.Dock = DockStyle.Fill;
-            //fire.SetGameplayReference(this);
-
-            //Controls.Add(fire);
-            //fire.FireScreen();
+            //Controls.Add(a);
+            //Controls.Add(b);
+            //PictureBox fireBox = fire.CreateFire(450, 900);
+            //Controls.Add(fireBox);
+            //fireBox.SendToBack();
 
             //goatSprite = goat.CreateGoat(new Point(90, 900));
             //Controls.Add(goatSprite);
             //goatSprite.BringToFront();
+            //a.SendToBack();
+            //b.SendToBack();
 
             //fallTimer.Start();
+            //nearnessTimer.Start();
+
+            Controls.Clear();
+            fallTimer.Start();
+
+            Fire fire = new Fire();
+            fire.Dock = DockStyle.Fill;
+            fire.SetGameplayReference(this);
+
+            Controls.Add(fire);
+            fire.FireScreen();
+
+            goatSprite = goat.CreateGoat(new Point(90, 900));
+            Controls.Add(goatSprite);
+            goatSprite.BringToFront();
+
+            CreateUserBar();
+
+            fallTimer.Start();
         }
 
         // Таймер для падения
@@ -125,7 +128,7 @@ namespace Bleat_Buddy
             return platform;
         }
 
-        // Меню паузы
+        // ВРЕМЕННОЕ меню паузы
         private void PauseMenu()
         {
             fallTimer.Stop();
@@ -187,6 +190,37 @@ namespace Bleat_Buddy
                 {
                     mainForm.mainMenu();
                 }
+            }
+        }
+        // ВРЕМЕННОЕ меню интерфейса
+
+        // Метод для создания UserBar
+        private void CreateUserBar()
+        {
+            if (hpLabel != null)
+            {
+                Controls.Remove(hpLabel);
+                hpLabel.Dispose();
+            }
+
+            hpLabel = new Label();
+            hpLabel.Location = new Point(70, 140);
+            hpLabel.Size = new Size(350, 60);
+            hpLabel.Font = new Font("Segoe Script", 28);
+            hpLabel.ForeColor = Color.Black;
+            hpLabel.BackColor = Color.Transparent;
+            hpLabel.Text = $"Здоровье: {goat.healthPoint}";
+
+            Controls.Add(hpLabel);
+            hpLabel.BringToFront();
+        }
+
+        // Метод для обновления HP
+        public void UpdateHealthDisplay()
+        {
+            if (hpLabel != null && !hpLabel.IsDisposed)
+            {
+                hpLabel.Text = $"Здоровье: {goat.healthPoint}";
             }
         }
 
