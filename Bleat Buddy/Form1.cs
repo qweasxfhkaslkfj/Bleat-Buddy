@@ -18,13 +18,33 @@ namespace Bleat_Buddy
         {
             this.WindowState = FormWindowState.Normal;
             this.FormBorderStyle = FormBorderStyle.None;
-            this.Bounds = Screen.PrimaryScreen.Bounds;
+
+            Screen primaryScreen = Screen.PrimaryScreen;
+            Size screenSize = primaryScreen.Bounds.Size;
+
+            if (screenSize.Width > 1920 || screenSize.Height > 1080)
+            {
+                MessageBox.Show("Размер экрана не поддерживается игрой\nДля корректного отображения всех элементов игры, разрешение было понижено до Full HD", "Предупреждение",
+                              MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+                this.Size = new Size(1920, 1080);
+
+                this.Location = new Point(
+                    (primaryScreen.Bounds.Width - 1920) / 2,
+                    (primaryScreen.Bounds.Height - 1080) / 2
+                );
+            }
+            else
+            {
+                this.Bounds = primaryScreen.Bounds;
+            }
+
             mainMenu();
         }
         // Главное меню
         public void mainMenu()
         {
-            Controls.Clear(); // Очистка прошлых элементов
+            Controls.Clear();
             currentGame = null;
 
             // Создание элементов визуала
