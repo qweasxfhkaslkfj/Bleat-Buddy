@@ -24,3 +24,7 @@ C:\Users\User\source\Bleat_Buddy\Bleat Buddy\obj\Debug\Interop.WMPLib.dll
 C:\Users\User\source\Bleat_Buddy\Bleat Buddy\obj\Debug\Bleat Buddy.csproj.ResolveComReference.cache
 C:\Users\User\source\Bleat_Buddy\Bleat Buddy\obj\Debug\Bleat Buddy.exe.config
 C:\Users\User\source\Bleat_Buddy\Bleat Buddy\obj\Debug\Interop.WMPLauncher.dll
+C:\Users\Денис\Source\Repos\Bleat-Buddy\Bleat_Buddy\Bleat Buddy\obj\Debug\Interop.MediaPlayer.dll
+C:\Users\Денис\Source\Repos\Bleat-Buddy\Bleat_Buddy\Bleat Buddy\obj\Debug\Interop.WMPLauncher.dll
+C:\Users\Денис\Source\Repos\Bleat-Buddy\Bleat_Buddy\Bleat Buddy\obj\Debug\Interop.WMPLib.dll
+C:\Users\Денис\Source\Repos\Bleat-Buddy\Bleat_Buddy\Bleat Buddy\obj\Debug\Bleat Buddy.csproj.ResolveComReference.cache
