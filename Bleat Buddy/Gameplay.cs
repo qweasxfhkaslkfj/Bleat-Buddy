@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Drawing;
-using System.Threading;
 using System.Windows.Forms;
 
 namespace Bleat_Buddy
@@ -8,13 +7,14 @@ namespace Bleat_Buddy
     internal class Gameplay : UserControl
     {
         private PictureBox goatSprite;
-        private System.Windows.Forms.Timer fallTimer;
-        private System.Windows.Forms.Timer nearnessTimer;
+        private Timer fallTimer;
+        private Timer nearnessTimer;
         private Label hpLabel;
-        Goat goat = new Goat();
+        public Goat goat = new Goat();
         Fire fire = new Fire();
         public PictureBox a = CreatePlatform(0, 991, 750, 150);
         public PictureBox b = CreatePlatform(900, 991, 1920, 150);
+        public PictureBox c = CreatePlatform(800, 900, 150, 25);
         int messCount = 1;
 
         public Gameplay()
@@ -25,44 +25,46 @@ namespace Bleat_Buddy
 
         public void FirstScreen()
         {
-            //Controls.Add(a);
-            //Controls.Add(b);
-            //PictureBox fireBox = fire.CreateFire(450, 900);
-            //Controls.Add(fireBox);
-            //fireBox.SendToBack();
+            Controls.Add(a);
+            Controls.Add(b);
+            Controls.Add(c);
+            PictureBox fireBox = fire.CreateFire(450, 931);
+            Controls.Add(fireBox);
+            fireBox.SendToBack();
 
-            //goatSprite = goat.CreateGoat(new Point(90, 900));
-            //Controls.Add(goatSprite);
-            //goatSprite.BringToFront();
-            //a.SendToBack();
-            //b.SendToBack();
-
-            //fallTimer.Start();
-            //nearnessTimer.Start();
-
-            Controls.Clear();
-            fallTimer.Start();
-
-            Fire fire = new Fire();
-            fire.Dock = DockStyle.Fill;
-            fire.SetGameplayReference(this);
-
-            Controls.Add(fire);
-            fire.FireScreen();
-
-            goatSprite = goat.CreateGoat(new Point(90, 900));
+            goatSprite = goat.CreateGoat(new Point(90, 870), goat.level);
             Controls.Add(goatSprite);
             goatSprite.BringToFront();
-
-            CreateUserBar();
+            a.SendToBack();
+            b.SendToBack();
+            c.SendToBack();
 
             fallTimer.Start();
+            nearnessTimer.Start();
+
+            //Controls.Clear();
+            //fallTimer.Start();
+
+            //Fire fire = new Fire();
+            //fire.Dock = DockStyle.Fill;
+            //fire.SetGameplayReference(this);
+
+            //Controls.Add(fire);
+            //fire.FireScreen();
+
+            //goatSprite = goat.CreateGoat(new Point(90, 870), goat.level);
+            //Controls.Add(goatSprite);
+            //goatSprite.BringToFront();
+
+            //CreateUserBar();
+
+            //fallTimer.Start();
         }
 
         // Таймер для падения
         private void InitializeFallTimer()
         {
-            fallTimer = new System.Windows.Forms.Timer();
+            fallTimer = new Timer();
             fallTimer.Interval = 50;
             fallTimer.Tick += FallTimer_Tick;
         }
@@ -98,25 +100,61 @@ namespace Bleat_Buddy
         // Падение
         public void Falling()
         {
-            if (!IsOnPlatform(goatSprite, a) && !IsOnPlatform(goatSprite, b))
-            {
-                goatSprite.Top += 10;
-                Thread.Sleep(5);
-            }
+            goat.UpdatePhysics();
+
+            CheckPlatformCollisions();
+
             if (goatSprite.Top >= 1080 && messCount == 1)
             {
                 messCount = 0;
                 End();
             }
         }
+
+        private void CheckPlatformCollisions()
+        {
+            bool landed = false;
+
+            PictureBox[] platforms = { a, b, c };
+
+            foreach (var platform in platforms)
+            {
+                if (IsOnPlatform(goatSprite, platform))
+                {
+                    if (goat.VerticalVelocity > 0 &&
+                        goatSprite.Bottom <= platform.Top + 15)
+                    {
+                        goatSprite.Top = platform.Top - goatSprite.Height;
+                        goat.Land();
+                        landed = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!landed && goatSprite.Top < 1080 - goatSprite.Height)
+            {
+                goat.isOnGround = false;
+            }
+
+            if (goatSprite.Bottom >= 1080 && goat.VerticalVelocity > 0)
+            {
+                goatSprite.Top = 1080 - goatSprite.Height;
+                goat.Land();
+            }
+        }
+
         // Проверка нахождения на платформе
         private bool IsOnPlatform(PictureBox goat, PictureBox platform)
         {
-            return goat.Bottom >= platform.Top &&
-                   goat.Bottom <= platform.Bottom &&
-                   goat.Right > platform.Left &&
-                   goat.Left < platform.Right;
+            bool isAbove = goat.Bottom >= platform.Top - 10 &&
+                          goat.Bottom <= platform.Top + 15;
+            bool isHorizontallyAligned = goat.Right > platform.Left + 10 &&
+                                        goat.Left < platform.Right - 10;
+
+            return isAbove && isHorizontallyAligned;
         }
+
         // Создание платформ
         private static PictureBox CreatePlatform(int x, int y, int w, int h)
         {
@@ -245,6 +283,7 @@ namespace Bleat_Buddy
         {
             goat.Goat_Movemant(goatSprite, e);
         }
+
         public void EscapeButton(KeyEventArgs e)
         {
             switch (e.KeyCode)
@@ -256,4 +295,4 @@ namespace Bleat_Buddy
             }
         }
     }
-}   
+}

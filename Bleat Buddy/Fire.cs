@@ -9,8 +9,13 @@ namespace Bleat_Buddy
     internal class Fire : UserControl
     {
         private static string projectRoot = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\..\"));
-        private string littleGoatFeed = Path.Combine(projectRoot, "resurse", "little-goat-Feed");
-        private Image fire_Texture = Image.FromFile(Path.Combine(projectRoot, "resurse", "fire.png"));
+        // Козёл ест
+        private string lvl_1_goatFeed = Path.Combine(projectRoot, "resurse", "feed", "lvl_1_goatFeed");
+        private string lvl_2_goatFeed = Path.Combine(projectRoot, "resurse", "feed", "lvl_2_goatFeed");
+        private string lvl_3_goatFeed = Path.Combine(projectRoot, "resurse", "feed", "lvl_3_goatFeed");
+        private string lvl_4_goatFeed = Path.Combine(projectRoot, "resurse", "feed", "lvl_4_goatFeed");
+        // Другие переменные
+        private Image fire_Texture = Image.FromFile(Path.Combine(projectRoot, "resurse", "box.png"));
         private Gameplay gameplay;
         Button firstBtn, secondBtn, thirdBtn, fourthBtn, fifthBtn, exitBtn;
         Goat goat = new Goat();
@@ -19,7 +24,7 @@ namespace Bleat_Buddy
         {
             PictureBox fire = new PictureBox();
             fire.Location = new Point(x, y);
-            fire.Size = new Size(90, 90);
+            fire.Size = new Size(105, 60);
             fire.Visible = true;
             fire.BackgroundImage = fire_Texture;
             fire.BackgroundImageLayout = ImageLayout.Stretch;
@@ -115,24 +120,86 @@ namespace Bleat_Buddy
 
                     if (result == DialogResult.Yes)
                     {
-                        int x = goat.Location.X;
+                        int x = gameplay.goat.Location.X;
                         int y = goat.Location.Y;
-                        for (int i = 1; i < 23; i++)
+
+                        if (goat.level == 1)
                         {
-                            PictureBox feed = new PictureBox();
-                            feed.Size = new Size(122, 138);
-                            feed.Location = new Point(x, y);
-                            feed.BackgroundImage = Image.FromFile(Path.Combine(littleGoatFeed, $"feed{i}.png"));
-                            feed.BackgroundImageLayout = ImageLayout.Stretch;
-                            feed.BringToFront();
-                            Controls.Add(feed);
+                            for (int i = 1; i < 23; i++)
+                            {
+                                PictureBox feed = new PictureBox();
+                                feed.Size = new Size(92, 104);
+                                feed.Location = new Point(x, y);
+                                feed.BackgroundImage = Image.FromFile(Path.Combine(lvl_1_goatFeed, $"feed{i}.png"));
+                                feed.BackgroundImageLayout = ImageLayout.Stretch;
+                                feed.BringToFront();
+                                Controls.Add(feed);
 
-                            Refresh();
-                            Thread.Sleep(100);
+                                Refresh();
+                                Thread.Sleep(100);
 
-                            Controls.Remove(feed);
-                            feed.Dispose();
+                                Controls.Remove(feed);
+                                feed.Dispose();
+                            }
                         }
+                        else if (goat.level == 2)
+                        {
+                            for (int i = 1; i < 27; i++)
+                            {
+                                PictureBox feed = new PictureBox();
+                                feed.Size = new Size(120, 300);
+                                feed.Location = new Point(x, y);
+                                feed.BackgroundImage = Image.FromFile(Path.Combine(lvl_2_goatFeed, $"feed{i}.png"));
+                                feed.BackgroundImageLayout = ImageLayout.Stretch;
+                                feed.BringToFront();
+                                Controls.Add(feed);
+
+                                Refresh();
+                                Thread.Sleep(100);
+
+                                Controls.Remove(feed);
+                                feed.Dispose();
+                            }
+                        }
+                        else if (goat.level == 3)
+                        {
+                            for (int i = 1; i < 26; i++)
+                            {
+                                PictureBox feed = new PictureBox();
+                                feed.Size = new Size(100, 140);
+                                feed.Location = new Point(x, y);
+                                feed.BackgroundImage = Image.FromFile(Path.Combine(lvl_3_goatFeed, $"feed{i}.png"));
+                                feed.BackgroundImageLayout = ImageLayout.Stretch;
+                                feed.BringToFront();
+                                Controls.Add(feed);
+
+                                Refresh();
+                                Thread.Sleep(100);
+
+                                Controls.Remove(feed);
+                                feed.Dispose();
+                            }
+                        }
+                        else if (goat.level == 4)
+                        {
+                            for (int i = 1; i < 26; i++)
+                            {
+                                PictureBox feed = new PictureBox();
+                                feed.Size = new Size(104, 136);
+                                feed.Location = new Point(x, y);
+                                feed.BackgroundImage = Image.FromFile(Path.Combine(lvl_4_goatFeed, $"feed{i}.png"));
+                                feed.BackgroundImageLayout = ImageLayout.Stretch;
+                                feed.BringToFront();
+                                Controls.Add(feed);
+
+                                Refresh();
+                                Thread.Sleep(100);
+
+                                Controls.Remove(feed);
+                                feed.Dispose();
+                            }
+                        }
+
                         goat.healthPoint = 3;
                         goat.crystalsCount--;
 
@@ -175,13 +242,13 @@ namespace Bleat_Buddy
         // ВРЕМЕННЫЙ ИНТЕРФЕЙС мытья
         private void CleanBtn_Click(object sender, EventArgs e)
         {
-            if (goat.dirtPoint > 1)
+            if (goat.dirty)
             {
                 DialogResult result = MessageBox.Show("Вы хотите помыть козлика?", "Мытьё", MessageBoxButtons.YesNo);
 
                 if (result == DialogResult.Yes)
                 {
-                    goat.dirtPoint = 0;
+                    goat.dirty = false;
                     MessageBox.Show("Теперь козлик чистый!");
                 }
             }

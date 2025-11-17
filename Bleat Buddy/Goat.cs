@@ -2,34 +2,44 @@
 using System.Drawing;
 using System.IO;
 using System.Media;
-using System.Threading;
 using System.Windows.Forms;
 
-namespace Bleat_Buddy 
+namespace Bleat_Buddy
 {
     internal class Goat : UserControl
     {
         // ToDo: Вывести базовые показатели и возможность их изменения
-
         PictureBox goat;
         int speed;
         // Текстуры козла
         private static string projectRoot = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\..\"));
-        private Image goatRight_Texture = Image.FromFile(Path.Combine(projectRoot, "resurse", "textureRight.png"));
-        private Image goatLeft_Texture = Image.FromFile(Path.Combine(projectRoot, "resurse", "textureLeft.png"));
+        private Image lvl_1_goatRight_Texture = Image.FromFile(Path.Combine(projectRoot, "resurse", "goats", "lvl_1_goatRight_Texture.png"));
+        private Image lvl_1_goatLeft_Texture = Image.FromFile(Path.Combine(projectRoot, "resurse", "goats", "lvl_1_goatLeft_Texture.png"));
+        private Image lvl_2_goatRight_Texture = Image.FromFile(Path.Combine(projectRoot, "resurse", "goats", "lvl_2_goatRight_Texture.png"));
+        private Image lvl_2_goatLeft_Texture = Image.FromFile(Path.Combine(projectRoot, "resurse", "goats", "lvl_2_goatLeft_Texture.png"));
+        private Image lvl_3_goatRight_Texture = Image.FromFile(Path.Combine(projectRoot, "resurse", "goats", "lvl_3_goatRight_Texture.png"));
+        private Image lvl_3_goatLeft_Texture = Image.FromFile(Path.Combine(projectRoot, "resurse", "goats", "lvl_3_goatLeft_Texture.png"));
+        private Image lvl_4_goatRight_Texture = Image.FromFile(Path.Combine(projectRoot, "resurse", "goats", "lvl_4_goatRight_Texture.png"));
+        private Image lvl_4_goatLeft_Texture = Image.FromFile(Path.Combine(projectRoot, "resurse", "goats", "lvl_4_goatLeft_Texture.png"));
+
         // Блеяние
         private string audioPath = Path.Combine(projectRoot, "resurse", "bleat.wav");
         // Прыжок
-        //private Timer jumpTimer;
+        private float verticalVelocity = 0;
+        private float gravity = 1.5f;
+        private float jumpForce = -18f;
+        private bool isJumping = false;
+        public bool isOnGround = false;
+        private int jumpCount = 0;
+        private const int maxJumps = 2;
         // Базовые показатели 
         public int energyPoint = 50;
         public int healthPoint = 2;
-        public int dirtPoint = 0;
+        public bool dirty = false;
         public int medCount = 0;
         public int crystalsCount = 1;
-        public int level = 2;
+        public int level = 3;
         public bool isSick = false;
-
 
         // Конструктор класса
         public Goat()
@@ -37,12 +47,30 @@ namespace Bleat_Buddy
             this.speed = 10;
         }
         // Создание козла
-        public PictureBox CreateGoat(Point location)
+        public PictureBox CreateGoat(Point location, int level)
         {
             goat = new PictureBox();
-            goat.Size = new Size(90, 90);
+
+            switch (level)
+            {
+                case 1:
+                    goat.Size = new Size(68, 68);
+                    goat.BackgroundImage = lvl_1_goatRight_Texture;
+                    break;
+                case 2:
+                    goat.Size = new Size(92, 100);
+                    goat.BackgroundImage = lvl_2_goatRight_Texture;
+                    break;
+                case 3:
+                    goat.Size = new Size(92, 120);
+                    goat.BackgroundImage = lvl_3_goatRight_Texture;
+                    break;
+                case 4:
+                    goat.Size = new Size(100, 120);
+                    goat.BackgroundImage = lvl_4_goatRight_Texture;
+                    break;
+            };
             goat.Location = location;
-            goat.BackgroundImage = goatRight_Texture;
             goat.BackgroundImageLayout = ImageLayout.Stretch;
             return goat;
         }
@@ -59,18 +87,44 @@ namespace Bleat_Buddy
                     if (leftBound > 0)
                     {
                         goatBtn.Left -= speed;
-                        goat.BackgroundImage = goatLeft_Texture;
+                        switch (level)
+                        {
+                            case 1:
+                                goat.BackgroundImage = lvl_1_goatLeft_Texture;
+                                break;
+                            case 2:
+                                goat.BackgroundImage = lvl_2_goatLeft_Texture;
+                                break;
+                            case 3:
+                                goat.BackgroundImage = lvl_3_goatLeft_Texture;
+                                break;
+                            case 4:
+                                goat.BackgroundImage = lvl_4_goatLeft_Texture;
+                                break;
+                        };
                         goat.BackgroundImageLayout = ImageLayout.Stretch;
-                        break;
                     }
                     break;
                 case Keys.D:
                     if (leftBound + 90 < Screen.PrimaryScreen.Bounds.Width)
                     {
                         goatBtn.Left += speed;
-                        goat.BackgroundImage = goatRight_Texture;
+                        switch (level)
+                        {
+                            case 1:
+                                goat.BackgroundImage = lvl_1_goatRight_Texture;
+                                break;
+                            case 2:
+                                goat.BackgroundImage = lvl_2_goatRight_Texture;
+                                break;
+                            case 3:
+                                goat.BackgroundImage = lvl_3_goatRight_Texture;
+                                break;
+                            case 4:
+                                goat.BackgroundImage = lvl_4_goatRight_Texture;
+                                break;
+                        };
                         goat.BackgroundImageLayout = ImageLayout.Stretch;
-                        break;
                     }
                     break;
                 case Keys.Space:
@@ -83,30 +137,49 @@ namespace Bleat_Buddy
                     Bleating();
                     break;
             }
-
         }
 
         // ToDo:
-        //       + Добавить двойной прыжок
-        //       + добавить движение влево-вправо во время прыжка
+        //       + Доработать, чтобы он продолжал идти во время прыжка, а не требовалось нажимать кнопку повторно
         // Прыжок
         private void Jump()
         {
-            int originalY = goat.Location.Y;
-            int jumpSteps = 20;
-
-            for (int i = 0; i < jumpSteps; i++)
+            if (jumpCount < maxJumps)
             {
-                goat.Top -= 5;
-                Thread.Sleep(5);
-            }
+                verticalVelocity = jumpForce;
+                isJumping = true;
+                isOnGround = false;
+                jumpCount++;
 
-            for (int i = 0; i < jumpSteps; i++)
-            {
-                goat.Top += 5;
-                Thread.Sleep(5);
+                if (jumpCount == 2)
+                {
+                    verticalVelocity = jumpForce * 0.7f;
+                }
             }
         }
+        // Физика прыжка
+        public void UpdatePhysics()
+        {
+            verticalVelocity += gravity;
+
+            if (goat != null)
+            {
+                goat.Top += (int)verticalVelocity;
+            }
+        }
+
+        // Сброс состояния прыжка приземлении
+        public void Land()
+        {
+            isJumping = false;
+            isOnGround = true;
+            jumpCount = 0;
+            verticalVelocity = 0;
+        }
+        // Геттеры для проверки состояния
+        public bool IsOnGround => isOnGround;
+        public bool IsJumping => isJumping;
+        public float VerticalVelocity => verticalVelocity;
 
         // Бадание
         private void Butting()
