@@ -6,7 +6,7 @@ namespace Bleat_Buddy
 {
     internal class Gameplay : UserControl
     {
-        private PictureBox goatSprite;
+        public PictureBox goatSprite;
         private Timer fallTimer;
         private Timer nearnessTimer;
         private Label hpLabel;
@@ -25,40 +25,40 @@ namespace Bleat_Buddy
 
         public void FirstScreen()
         {
-            Controls.Add(a);
-            Controls.Add(b);
-            Controls.Add(c);
-            PictureBox fireBox = fire.CreateFire(450, 931);
-            Controls.Add(fireBox);
-            fireBox.SendToBack();
-
-            goatSprite = goat.CreateGoat(new Point(90, 870), goat.level);
-            Controls.Add(goatSprite);
-            goatSprite.BringToFront();
-            a.SendToBack();
-            b.SendToBack();
-            c.SendToBack();
-
-            fallTimer.Start();
-            nearnessTimer.Start();
-
-            //Controls.Clear();
-            //fallTimer.Start();
-
-            //Fire fire = new Fire();
-            //fire.Dock = DockStyle.Fill;
-            //fire.SetGameplayReference(this);
-
-            //Controls.Add(fire);
-            //fire.FireScreen();
+            //Controls.Add(a);
+            //Controls.Add(b);
+            //Controls.Add(c);
+            //PictureBox fireBox = fire.CreateFire(450, 931);
+            //Controls.Add(fireBox);
+            //fireBox.SendToBack();
 
             //goatSprite = goat.CreateGoat(new Point(90, 870), goat.level);
             //Controls.Add(goatSprite);
             //goatSprite.BringToFront();
-
-            //CreateUserBar();
+            //a.SendToBack();
+            //b.SendToBack();
+            //c.SendToBack();
 
             //fallTimer.Start();
+            //nearnessTimer.Start();
+
+            Controls.Clear();
+            fallTimer.Start();
+
+            Fire fire = new Fire();
+            fire.Dock = DockStyle.Fill;
+            fire.SetGameplayReference(this);
+
+            Controls.Add(fire);
+            fire.FireScreen();
+
+            goatSprite = goat.CreateGoat(new Point(90, 870), goat.level);
+            Controls.Add(goatSprite);
+            goatSprite.BringToFront();
+
+            CreateUserBar();
+
+            fallTimer.Start();
         }
 
         // Таймер для падения

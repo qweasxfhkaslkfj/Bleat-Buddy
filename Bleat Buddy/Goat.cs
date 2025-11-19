@@ -21,6 +21,9 @@ namespace Bleat_Buddy
         private Image lvl_3_goatLeft_Texture = Image.FromFile(Path.Combine(projectRoot, "resurse", "goats", "lvl_3_goatLeft_Texture.png"));
         private Image lvl_4_goatRight_Texture = Image.FromFile(Path.Combine(projectRoot, "resurse", "goats", "lvl_4_goatRight_Texture.png"));
         private Image lvl_4_goatLeft_Texture = Image.FromFile(Path.Combine(projectRoot, "resurse", "goats", "lvl_4_goatLeft_Texture.png"));
+        // Анимации козла
+        // Козёл ходит
+        private string lvl_1_goatWalkingRight = Path.Combine(projectRoot, "resurse", "walkingRight", "lvl_1_goatWalking");
 
         // Блеяние
         private string audioPath = Path.Combine(projectRoot, "resurse", "bleat.wav");
@@ -38,7 +41,7 @@ namespace Bleat_Buddy
         public bool dirty = false;
         public int medCount = 0;
         public int crystalsCount = 1;
-        public int level = 3;
+        public int level = 2;
         public bool isSick = false;
 
         // Конструктор класса
@@ -69,7 +72,8 @@ namespace Bleat_Buddy
                     goat.Size = new Size(100, 120);
                     goat.BackgroundImage = lvl_4_goatRight_Texture;
                     break;
-            };
+            }
+            ;
             goat.Location = location;
             goat.BackgroundImageLayout = ImageLayout.Stretch;
             return goat;
@@ -101,7 +105,8 @@ namespace Bleat_Buddy
                             case 4:
                                 goat.BackgroundImage = lvl_4_goatLeft_Texture;
                                 break;
-                        };
+                        }
+                        ;
                         goat.BackgroundImageLayout = ImageLayout.Stretch;
                     }
                     break;
@@ -123,7 +128,8 @@ namespace Bleat_Buddy
                             case 4:
                                 goat.BackgroundImage = lvl_4_goatRight_Texture;
                                 break;
-                        };
+                        }
+                        ;
                         goat.BackgroundImageLayout = ImageLayout.Stretch;
                     }
                     break;
@@ -139,8 +145,6 @@ namespace Bleat_Buddy
             }
         }
 
-        // ToDo:
-        //       + Доработать, чтобы он продолжал идти во время прыжка, а не требовалось нажимать кнопку повторно
         // Прыжок
         private void Jump()
         {
