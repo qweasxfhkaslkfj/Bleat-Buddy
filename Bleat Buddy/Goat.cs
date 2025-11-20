@@ -21,6 +21,11 @@ namespace Bleat_Buddy
         private Image lvl_3_goatLeft_Texture = Image.FromFile(Path.Combine(projectRoot, "resurse", "goats", "lvl_3_goatLeft_Texture.png"));
         private Image lvl_4_goatRight_Texture = Image.FromFile(Path.Combine(projectRoot, "resurse", "goats", "lvl_4_goatRight_Texture.png"));
         private Image lvl_4_goatLeft_Texture = Image.FromFile(Path.Combine(projectRoot, "resurse", "goats", "lvl_4_goatLeft_Texture.png"));
+        // Грязный козёл
+        private Image lvl_1_dirtyGoatLeft_Texture = Image.FromFile(Path.Combine(projectRoot, "resurse", "dirtyGoats", "lvl_1_dirtyGoatLeft_Texture.png"));
+        private Image lvl_2_dirtyGoatLeft_Texture = Image.FromFile(Path.Combine(projectRoot, "resurse", "dirtyGoats", "lvl_2_dirtyGoatLeft_Texture.png"));
+        private Image lvl_3_dirtyGoatLeft_Texture = Image.FromFile(Path.Combine(projectRoot, "resurse", "dirtyGoats", "lvl_3_dirtyGoatLeft_Texture.png"));
+        private Image lvl_4_dirtyGoatLeft_Texture = Image.FromFile(Path.Combine(projectRoot, "resurse", "dirtyGoats", "lvl_4_dirtyGoatLeft_Texture.png"));
         // Анимации козла
         // Козёл ходит
         private string lvl_1_goatWalkingRight = Path.Combine(projectRoot, "resurse", "walkingRight", "lvl_1_goatWalking");
@@ -94,16 +99,44 @@ namespace Bleat_Buddy
                         switch (level)
                         {
                             case 1:
-                                goat.BackgroundImage = lvl_1_goatLeft_Texture;
+                                if (dirty)
+                                {
+                                    goat.BackgroundImage = lvl_1_dirtyGoatLeft_Texture;
+                                }
+                                else
+                                {
+                                    goat.BackgroundImage = lvl_1_goatLeft_Texture;
+                                }
                                 break;
                             case 2:
-                                goat.BackgroundImage = lvl_2_goatLeft_Texture;
+                                if (dirty)
+                                {
+                                    goat.BackgroundImage = lvl_2_dirtyGoatLeft_Texture;
+                                }
+                                else
+                                {
+                                    goat.BackgroundImage = lvl_2_goatLeft_Texture;
+                                }
                                 break;
                             case 3:
-                                goat.BackgroundImage = lvl_3_goatLeft_Texture;
+                                if (dirty)
+                                {
+                                    goat.BackgroundImage = lvl_3_dirtyGoatLeft_Texture;
+                                }
+                                else
+                                {
+                                    goat.BackgroundImage = lvl_3_goatLeft_Texture;
+                                }
                                 break;
                             case 4:
-                                goat.BackgroundImage = lvl_4_goatLeft_Texture;
+                                if (dirty)
+                                {
+                                    goat.BackgroundImage = lvl_4_dirtyGoatLeft_Texture;
+                                }
+                                else
+                                {
+                                    goat.BackgroundImage = lvl_4_goatLeft_Texture;
+                                }
                                 break;
                         }
                         ;
@@ -117,19 +150,46 @@ namespace Bleat_Buddy
                         switch (level)
                         {
                             case 1:
-                                goat.BackgroundImage = lvl_1_goatRight_Texture;
+                                if (dirty)
+                                {
+                                    goat.BackgroundImage = lvl_1_dirtyGoatLeft_Texture;
+                                }
+                                else
+                                {
+                                    goat.BackgroundImage = lvl_1_goatRight_Texture;
+                                }
                                 break;
                             case 2:
-                                goat.BackgroundImage = lvl_2_goatRight_Texture;
+                                if (dirty)
+                                {
+                                    goat.BackgroundImage = lvl_2_dirtyGoatLeft_Texture;
+                                }
+                                else
+                                {
+                                    goat.BackgroundImage = lvl_2_goatRight_Texture;
+                                }
                                 break;
                             case 3:
-                                goat.BackgroundImage = lvl_3_goatRight_Texture;
+                                if (dirty)
+                                {
+                                    goat.BackgroundImage = lvl_3_dirtyGoatLeft_Texture;
+                                }
+                                else
+                                {
+                                    goat.BackgroundImage = lvl_3_goatRight_Texture;
+                                }
                                 break;
                             case 4:
-                                goat.BackgroundImage = lvl_4_goatRight_Texture;
+                                if (dirty)
+                                {
+                                    goat.BackgroundImage = lvl_4_dirtyGoatLeft_Texture;
+                                }
+                                else
+                                {
+                                    goat.BackgroundImage = lvl_4_goatRight_Texture;
+                                }
                                 break;
-                        }
-                        ;
+                        };
                         goat.BackgroundImageLayout = ImageLayout.Stretch;
                     }
                     break;
@@ -141,6 +201,8 @@ namespace Bleat_Buddy
                     break;
                 case Keys.Q:
                     Bleating();
+                    break;
+                case Keys.E:
                     break;
             }
         }

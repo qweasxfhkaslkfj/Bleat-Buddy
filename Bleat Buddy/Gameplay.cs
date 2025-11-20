@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 
 namespace Bleat_Buddy
@@ -7,15 +8,25 @@ namespace Bleat_Buddy
     internal class Gameplay : UserControl
     {
         public PictureBox goatSprite;
-        private Timer fallTimer;
+        public Timer fallTimer;
         private Timer nearnessTimer;
         private Label hpLabel;
         public Goat goat = new Goat();
         Fire fire = new Fire();
-        public PictureBox a = CreatePlatform(0, 991, 750, 150);
-        public PictureBox b = CreatePlatform(900, 991, 1920, 150);
-        public PictureBox c = CreatePlatform(800, 900, 150, 25);
+        //public PictureBox a = CreatePlatform(0, 991, 750, 150);
+        //public PictureBox b = CreatePlatform(900, 991, 1920, 150);
+        //public PictureBox c = CreatePlatform(800, 900, 150, 25);
+        public PictureBox bathroom_Floar = CreatePlatform(0, 900, 1920, 150);
         int messCount = 1;
+        private static string projectRoot = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\..\"));
+        private bool isNearBath = false;
+
+        private bool isBathAnimating = false;
+        private Timer bathAnimationTimer;
+        private int bathAnimationFrame = 0;
+        private PictureBox currentBath;
+        private Image bath1, bath2, bath3;
+
 
         public Gameplay()
         {
@@ -42,24 +53,187 @@ namespace Bleat_Buddy
             //fallTimer.Start();
             //nearnessTimer.Start();
 
+            //Controls.Clear();
+            //fallTimer.Start();
+
+            //Fire fire = new Fire();
+            //fire.Dock = DockStyle.Fill;
+            //fire.SetGameplayReference(this);
+
+            //Controls.Add(fire);
+            //fire.FireScreen();
+
+            //goatSprite = goat.CreateGoat(new Point(90, 870), goat.level);
+            //Controls.Add(goatSprite);
+            //goatSprite.BringToFront();
+
+            //CreateUserBar();
+            //fallTimer.Start();
+
+            Bathroom();
+        }
+
+        public void Bathroom()
+        {
+            Image bathroom_Background = Image.FromFile(Path.Combine(projectRoot, "resurse", "backgrounds", "bathroom.png"));
+
             Controls.Clear();
-            fallTimer.Start();
 
-            Fire fire = new Fire();
-            fire.Dock = DockStyle.Fill;
-            fire.SetGameplayReference(this);
+            PictureBox bathroom = new PictureBox();
+            bathroom.Dock = DockStyle.Fill;
+            bathroom.BackgroundImage = bathroom_Background;
+            bathroom.BackgroundImageLayout = ImageLayout.Stretch;
+            Controls.Add(bathroom);
 
-            Controls.Add(fire);
-            fire.FireScreen();
+            PictureBox bath = fire.CreateBath(960, 520);
+            bath.Tag = "bath";
+            Controls.Add(bath);
+            bath.BringToFront();
 
-            goatSprite = goat.CreateGoat(new Point(90, 870), goat.level);
+            goatSprite = goat.CreateGoat(new Point(85, 600), goat.level);
             Controls.Add(goatSprite);
             goatSprite.BringToFront();
 
-            CreateUserBar();
+            bathroom_Floar = CreatePlatform(0, 850, 1920, 50);
+            Controls.Add(bathroom_Floar);
+            bathroom_Floar.SendToBack();
 
             fallTimer.Start();
+            nearnessTimer.Start();
         }
+
+        private void CheckBathNearness()
+        {
+            PictureBox bath = null;
+            foreach (Control control in Controls)
+            {
+                if (control is PictureBox && control.Tag?.ToString() == "bath")
+                {
+                    bath = (PictureBox)control;
+                    break;
+                }
+            }
+
+            if (bath != null)
+            {
+                int bathCenterX = bath.Left + bath.Width / 2;
+                int bathCenterY = bath.Top + bath.Height / 2;
+
+                int goatCenterX = goatSprite.Left + goatSprite.Width / 2;
+                int goatCenterY = goatSprite.Top + goatSprite.Height / 2;
+
+                int distance = (int)Math.Sqrt(Math.Pow(goatCenterX - bathCenterX, 2) + Math.Pow(goatCenterY - bathCenterY, 2));
+
+                isNearBath = distance < 150;
+            }
+            else
+            {
+                isNearBath = false;
+            }
+        }
+        public void InteractWithBath()
+        {
+            if (isNearBath && !isBathAnimating)
+            {
+                currentBath = null;
+                foreach (Control control in Controls)
+                {
+                    if (control is PictureBox && control.Tag?.ToString() == "bath")
+                    {
+                        currentBath = (PictureBox)control;
+                        break;
+                    }
+                }
+
+                if (currentBath != null)
+                {
+                    if (bath1 == null || bath2 == null || bath3 == null)
+                    {
+                        string bathImagePath1 = Path.Combine(projectRoot, "resurse", "washing", "bath1.png");
+                        string bathImagePath2 = Path.Combine(projectRoot, "resurse", "washing", "bath2.png");
+                        string bathImagePath3 = Path.Combine(projectRoot, "resurse", "washing", "bath3.png");
+
+                        if (!File.Exists(bathImagePath1) || !File.Exists(bathImagePath2) || !File.Exists(bathImagePath3))
+                        {
+                            MessageBox.Show("Файлы анимации ванны не найдены!");
+                            return;
+                        }
+
+                        try
+                        {
+                            bath1 = Image.FromFile(bathImagePath1);
+                            bath2 = Image.FromFile(bathImagePath2);
+                            bath3 = Image.FromFile(bathImagePath3);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show($"Ошибка загрузки изображений: {ex.Message}");
+                            return;
+                        }
+                    }
+
+                    isBathAnimating = true;
+                    bathAnimationFrame = 0;
+
+                    bathAnimationTimer = new Timer();
+                    bathAnimationTimer.Interval = 100;
+                    bathAnimationTimer.Tick += BathAnimationTimer_Tick;
+                    bathAnimationTimer.Start();
+                }
+            }
+        }
+        private void BathAnimationTimer_Tick(object sender, EventArgs e)
+        {
+            if (currentBath == null || bath1 == null || bath2 == null || bath3 == null)
+            {
+                StopBathAnimation();
+                return;
+            }
+
+            try
+            {
+                if (bathAnimationFrame < 12)
+                {
+                    if (bathAnimationFrame % 2 == 0)
+                    {
+                        currentBath.BackgroundImage = bath2;
+                    }
+                    else
+                    {
+                        currentBath.BackgroundImage = bath3;
+                    }
+
+                    bathAnimationFrame++;
+                }
+                else
+                {
+                    currentBath.BackgroundImage = bath1;
+                    StopBathAnimation();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка анимации: {ex.Message}");
+                StopBathAnimation();
+            }
+        }
+        private void StopBathAnimation()
+        {
+            if (bathAnimationTimer != null)
+            {
+                bathAnimationTimer.Stop();
+                bathAnimationTimer.Dispose();
+                bathAnimationTimer = null;
+            }
+            isBathAnimating = false;
+            bathAnimationFrame = 0;
+
+            goat.dirty = false;
+            goat.Refresh();
+        }
+
+
+
 
         // Таймер для падения
         private void InitializeFallTimer()
@@ -101,8 +275,8 @@ namespace Bleat_Buddy
         public void Falling()
         {
             goat.UpdatePhysics();
-
             CheckPlatformCollisions();
+            CheckBathNearness();
 
             if (goatSprite.Top >= 1080 && messCount == 1)
             {
@@ -111,11 +285,13 @@ namespace Bleat_Buddy
             }
         }
 
+
         private void CheckPlatformCollisions()
         {
             bool landed = false;
 
-            PictureBox[] platforms = { a, b, c };
+            //PictureBox[] platforms = { a, b };
+            PictureBox[] platforms = { bathroom_Floar };
 
             foreach (var platform in platforms)
             {
@@ -282,6 +458,11 @@ namespace Bleat_Buddy
         public void KeyPress(KeyEventArgs e)
         {
             goat.Goat_Movemant(goatSprite, e);
+
+            if (e.KeyCode == Keys.E)
+            {
+                InteractWithBath();
+            }
         }
 
         public void EscapeButton(KeyEventArgs e)
@@ -294,5 +475,22 @@ namespace Bleat_Buddy
                     break;
             }
         }
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                StopBathAnimation();
+
+                bath1?.Dispose();
+                bath2?.Dispose();
+                bath3?.Dispose();
+
+                bath1 = null;
+                bath2 = null;
+                bath3 = null;
+            }
+            base.Dispose(disposing);
+        }
+
     }
 }

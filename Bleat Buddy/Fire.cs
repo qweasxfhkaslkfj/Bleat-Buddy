@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
-using System.Reflection.Emit;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Bleat_Buddy
@@ -18,6 +16,10 @@ namespace Bleat_Buddy
         private string lvl_4_goatFeed = Path.Combine(projectRoot, "resurse", "feed", "lvl_4_goatFeed");
         // Другие переменные
         private Image box_Texture = Image.FromFile(Path.Combine(projectRoot, "resurse", "box.png"));
+        // Ванная
+        private Image bathroom_Background = Image.FromFile(Path.Combine(projectRoot, "resurse", "backgrounds", "bathroom.png"));
+        private string bath = Path.Combine(projectRoot, "resurse", "washing");
+
         private Gameplay gameplay;
         Button firstBtn, secondBtn, thirdBtn, fourthBtn, fifthBtn, exitBtn;
         Goat goat = new Goat();
@@ -228,10 +230,11 @@ namespace Bleat_Buddy
                 MessageBox.Show("У вас достаточно лекарственных бутылочек!");
             }
         }
-        // ВРЕМЕННЫЙ ИНТЕРФЕЙС мытья
+        // Интерфейс мытья
+
         private void CleanBtn_Click(object sender, EventArgs e)
         {
-            if (goat.dirty)
+            /*if (goat.dirty)
             {
                 DialogResult result = MessageBox.Show("Вы хотите помыть козлика?", "Мытьё", MessageBoxButtons.YesNo);
 
@@ -244,7 +247,28 @@ namespace Bleat_Buddy
             else
             {
                 MessageBox.Show("Козлик и так достаточно чистый!");
+            }*/
+        }
+
+        public PictureBox CreateBath(int x, int y)
+        {
+            PictureBox bath = new PictureBox();
+            bath.Location = new Point(x, y);
+            bath.Size = new Size(300, 300);
+            bath.Visible = true;
+
+            string bathImagePath = Path.Combine(projectRoot, "resurse", "washing", "bath1.png");
+            if (File.Exists(bathImagePath))
+            {
+                bath.BackgroundImage = Image.FromFile(bathImagePath);
             }
+            else
+            {
+                bath.BackColor = Color.Blue;
+            }
+
+            bath.BackgroundImageLayout = ImageLayout.Stretch;
+            return bath;
         }
         // ВРЕМЕННЫЙ ИНТЕРФЕЙС гардероба
         private void ClothesBtn_Click(object sender, EventArgs e)
