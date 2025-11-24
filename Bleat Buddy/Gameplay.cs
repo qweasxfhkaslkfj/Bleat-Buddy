@@ -13,8 +13,8 @@ namespace Bleat_Buddy
         private Label hpLabel;
         public Goat goat = new Goat();
         Fire fire = new Fire();
-        //public PictureBox a = CreatePlatform(0, 991, 750, 150);
-        //public PictureBox b = CreatePlatform(900, 991, 1920, 150);
+        public PictureBox a = CreatePlatform(0, 991, 750, 150);
+        public PictureBox b = CreatePlatform(900, 991, 1920, 150);
         //public PictureBox c = CreatePlatform(800, 900, 150, 25);
         public PictureBox bathroom_Floar = CreatePlatform(0, 900, 1920, 150);
         int messCount = 1;
@@ -26,12 +26,17 @@ namespace Bleat_Buddy
         private int bathAnimationFrame = 0;
         private PictureBox currentBath;
         private Image bath1, bath2, bath3;
-
+        private StatsUI statsUI;
 
         public Gameplay()
         {
             InitializeFallTimer();
             InitializeNearnessTimer();
+
+            statsUI = new StatsUI(goat);
+            statsUI.SetPosition(new Point(10, 10));
+
+            goat.SetGameplayReference(this);
         }
 
         public void FirstScreen()
@@ -50,27 +55,30 @@ namespace Bleat_Buddy
             //b.SendToBack();
             //c.SendToBack();
 
-            //fallTimer.Start();
-            //nearnessTimer.Start();
+            fallTimer.Start();
+            nearnessTimer.Start();
+            goat.StartEnergyTimer();
 
-            //Controls.Clear();
-            //fallTimer.Start();
+            Controls.Clear();
+            fallTimer.Start();
 
-            //Fire fire = new Fire();
-            //fire.Dock = DockStyle.Fill;
-            //fire.SetGameplayReference(this);
+            Fire fire = new Fire();
+            fire.Dock = DockStyle.Fill;
+            fire.SetGameplayReference(this);
+            fire.SetGoatReference(this.goat);
+            Controls.Add(fire);
 
-            //Controls.Add(fire);
-            //fire.FireScreen();
+            fire.FireScreen();
+            goatSprite = goat.CreateGoat(new Point(90, 870), goat.level);
+            Controls.Add(goatSprite);
+            goatSprite.BringToFront();
 
-            //goatSprite = goat.CreateGoat(new Point(90, 870), goat.level);
-            //Controls.Add(goatSprite);
-            //goatSprite.BringToFront();
+            Controls.Add(statsUI);
+            statsUI.BringToFront();
 
-            //CreateUserBar();
-            //fallTimer.Start();
+            fallTimer.Start();
 
-            Bathroom();
+            //Bathroom();
         }
 
         public void Bathroom()
@@ -101,7 +109,6 @@ namespace Bleat_Buddy
             fallTimer.Start();
             nearnessTimer.Start();
         }
-
         private void CheckBathNearness()
         {
             PictureBox bath = null;
@@ -229,11 +236,9 @@ namespace Bleat_Buddy
             bathAnimationFrame = 0;
 
             goat.dirty = false;
+            UpdateStatsDisplay();
             goat.Refresh();
         }
-
-
-
 
         // Таймер для падения
         private void InitializeFallTimer()
@@ -290,8 +295,8 @@ namespace Bleat_Buddy
         {
             bool landed = false;
 
-            //PictureBox[] platforms = { a, b };
-            PictureBox[] platforms = { bathroom_Floar };
+            PictureBox[] platforms = { a, b };
+            //PictureBox[] platforms = { bathroom_Floar };
 
             foreach (var platform in platforms)
             {
@@ -407,7 +412,11 @@ namespace Bleat_Buddy
             }
         }
         // ВРЕМЕННОЕ меню интерфейса
-
+        public void UpdateStatsDisplay()
+        {
+            if (statsUI != null)
+                statsUI.UpdateStats();
+        }
         // Метод для создания UserBar
         private void CreateUserBar()
         {
@@ -491,6 +500,5 @@ namespace Bleat_Buddy
             }
             base.Dispose(disposing);
         }
-
     }
 }

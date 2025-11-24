@@ -67,6 +67,9 @@
     <Compile Include="Settings.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="StatsUI.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>

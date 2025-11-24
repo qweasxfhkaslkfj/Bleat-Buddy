@@ -10,6 +10,8 @@ namespace Bleat_Buddy
     {
         // ToDo: Вывести базовые показатели и возможность их изменения
         PictureBox goat;
+        Gameplay gameplay;
+        private Timer energyTimer;
         int speed;
         // Текстуры козла
         private static string projectRoot = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\..\"));
@@ -40,19 +42,21 @@ namespace Bleat_Buddy
         public bool isOnGround = false;
         private int jumpCount = 0;
         private const int maxJumps = 2;
+
         // Базовые показатели 
-        public int energyPoint = 50;
-        public int healthPoint = 2;
+        public int energyPoint = 70;
+        public int healthPoint = 3;
         public bool dirty = false;
         public int medCount = 0;
         public int crystalsCount = 1;
         public int level = 2;
-        public bool isSick = false;
+        public bool isSick = true;
 
         // Конструктор класса
         public Goat()
         {
             this.speed = 10;
+            InitializeEnergyTimer();
         }
         // Создание козла
         public PictureBox CreateGoat(Point location, int level)
@@ -77,8 +81,8 @@ namespace Bleat_Buddy
                     goat.Size = new Size(100, 120);
                     goat.BackgroundImage = lvl_4_goatRight_Texture;
                     break;
-            }
-            ;
+            };
+            BackColor = Color.Transparent;
             goat.Location = location;
             goat.BackgroundImageLayout = ImageLayout.Stretch;
             return goat;
@@ -204,6 +208,9 @@ namespace Bleat_Buddy
                     break;
                 case Keys.E:
                     break;
+                case Keys.R:
+                    Healing();
+                    break;
             }
         }
 
@@ -233,7 +240,6 @@ namespace Bleat_Buddy
                 goat.Top += (int)verticalVelocity;
             }
         }
-
         // Сброс состояния прыжка приземлении
         public void Land()
         {
@@ -247,7 +253,7 @@ namespace Bleat_Buddy
         public bool IsJumping => isJumping;
         public float VerticalVelocity => verticalVelocity;
 
-        // Бадание
+        // Бодание
         private void Butting()
         {
             goat.Location = new Point(goat.Location.X + 30, goat.Location.Y);
@@ -268,5 +274,67 @@ namespace Bleat_Buddy
                 }
             }
         }
+
+        // Лечение 
+        private void Healing()
+        {
+            if (isSick)
+            {
+                isSick = false;
+                if (gameplay != null)
+                    gameplay.UpdateStatsDisplay();
+
+                MessageBox.Show("Козлик подлечился");
+            }
+        }
+        public void SetGameplayReference(Gameplay game)
+        {
+            this.gameplay = game;
+        }
+
+        // Минус энергия
+        private void InitializeEnergyTimer()
+        {
+            energyTimer = new Timer();
+            energyTimer.Interval = 3000;
+            energyTimer.Tick += EnergyTimer_Tick;
+        }
+
+        // Обработчик таймера энергии
+        private void EnergyTimer_Tick(object sender, EventArgs e)
+        {
+            if (energyPoint > 0)
+            {
+                energyPoint--;
+
+                if (gameplay != null)
+                    gameplay.UpdateStatsDisplay();
+            }
+            else
+            {
+                speed = 5;
+            }
+        }
+
+        // Метод для запуска таймера
+        public void StartEnergyTimer()
+        {
+            energyTimer.Start();
+        }
+
+        // Метод для остановки таймера
+        public void StopEnergyTimer()
+        {
+            energyTimer.Stop();
+        }
+
+        // Метод для сброса таймера
+        public void ResetEnergyTimer()
+        {
+            energyTimer.Stop();
+            energyPoint = 20;
+            speed = 10;
+        }
+
     }
 }

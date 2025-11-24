@@ -22,7 +22,7 @@ namespace Bleat_Buddy
 
         private Gameplay gameplay;
         Button firstBtn, secondBtn, thirdBtn, fourthBtn, fifthBtn, exitBtn;
-        Goat goat = new Goat();
+        Goat goat;
 
         public PictureBox CreateFire(int x, int y)
         {
@@ -99,14 +99,130 @@ namespace Bleat_Buddy
         // ВРЕМЕННЫЙ ИНТЕРФЕЙС сна
         private void SleepBtn_Click(object sender, EventArgs e)
         {
-            if (goat.energyPoint < 70)
+            if (goat != null && goat.energyPoint < 70)
             {
-                MessageBox.Show("Козлик поспал!");
-                goat.energyPoint = 100;
+                // Запускаем анимацию сна
+                StartSleepAnimation();
             }
             else
             {
                 MessageBox.Show("Козлик ещё не очень устал, он не хочет спать");
+            }
+        }
+
+        // Анимация сна
+        private void StartSleepAnimation()
+        {
+            // Создаем PictureBox для анимации
+            PictureBox sleepAnimation = new PictureBox();
+            sleepAnimation.Size = new Size(10, 10); // Начинаем с очень маленького размера
+            sleepAnimation.Location = new Point(
+                (this.Width - sleepAnimation.Width) / 2,
+                (this.Height - sleepAnimation.Height) / 2
+            );
+            sleepAnimation.BackgroundImageLayout = ImageLayout.Stretch;
+
+            // Загружаем первую текстуру
+            string firstTexturePath = Path.Combine(projectRoot, "resurse", "1dot.png");
+            if (File.Exists(firstTexturePath))
+            {
+                sleepAnimation.BackgroundImage = Image.FromFile(firstTexturePath);
+            }
+            else
+            {
+                sleepAnimation.BackColor = Color.Black; // Fallback цвет
+            }
+
+            Controls.Add(sleepAnimation);
+            sleepAnimation.BringToFront();
+
+            // Запускаем анимацию в отдельном потоке
+            Thread animationThread = new Thread(() => SleepAnimation(sleepAnimation));
+            animationThread.Start();
+        }
+
+        private void SleepAnimation(PictureBox sleepBox)
+        {
+            int steps = 25;
+            int maxWidth = this.Width;
+            int maxHeight = this.Height;
+
+            // Фаза увеличения
+            for (int i = 1; i <= steps; i++)
+            {
+                // Обновляем UI в основном потоке
+                this.Invoke(new Action(() =>
+                {
+                    // Вычисляем новый размер
+                    int newWidth = 10 + (maxWidth - 10) * i / steps;
+                    int newHeight = 10 + (maxHeight - 10) * i / steps;
+
+                    // Обновляем размер и позицию
+                    sleepBox.Size = new Size(newWidth, newHeight);
+                    sleepBox.Location = new Point(
+                        (this.Width - newWidth) / 2,
+                        (this.Height - newHeight) / 2
+                    );
+
+                    // Обновляем текстуру (если есть разные текстуры для разных шагов)
+                    string texturePath = Path.Combine(projectRoot, "resurse", $"{Math.Min(i, 5)}dot.png");
+                    if (File.Exists(texturePath))
+                    {
+                        sleepBox.BackgroundImage = Image.FromFile(texturePath);
+                    }
+
+                    this.Refresh();
+                }));
+
+                Thread.Sleep(50); // Задержка между шагами
+            }
+
+            // Ждем немного в полностью развернутом состоянии
+            Thread.Sleep(500);
+
+            // Фаза уменьшения
+            for (int i = steps; i >= 0; i--)
+            {
+                this.Invoke(new Action(() =>
+                {
+                    if (i > 0)
+                    {
+                        // Вычисляем новый размер
+                        int newWidth = 10 + (maxWidth - 10) * i / steps;
+                        int newHeight = 10 + (maxHeight - 10) * i / steps;
+
+                        // Обновляем размер и позицию
+                        sleepBox.Size = new Size(newWidth, newHeight);
+                        sleepBox.Location = new Point(
+                            (this.Width - newWidth) / 2,
+                            (this.Height - newHeight) / 2
+                        );
+
+                        // Обновляем текстуру
+                        string texturePath = Path.Combine(projectRoot, "resurse", $"{Math.Min(i, 5)}dot.png");
+                        if (File.Exists(texturePath))
+                        {
+                            sleepBox.BackgroundImage = Image.FromFile(texturePath);
+                        }
+                    }
+                    else
+                    {
+                        // Удаляем PictureBox
+                        Controls.Remove(sleepBox);
+                        sleepBox.Dispose();
+
+                        // Восстанавливаем энергию козлика
+                        goat.energyPoint = 100;
+                        if (gameplay != null)
+                            gameplay.UpdateStatsDisplay();
+
+                        MessageBox.Show("Козлик поспал!");
+                    }
+
+                    this.Refresh();
+                }));
+
+                Thread.Sleep(50); // Задержка между шагами
             }
         }
         // ВРЕМЕННАЯ РЕАЛИЗАЦИЯ кормления
@@ -146,7 +262,7 @@ namespace Bleat_Buddy
                         goat.healthPoint = 3;
                         goat.crystalsCount--;
 
-                        gameplay.UpdateHealthDisplay();
+                        gameplay.UpdateStatsDisplay();
                     }
                 }
             }
@@ -222,6 +338,7 @@ namespace Bleat_Buddy
                         goat.medCount = 3;
                         goat.crystalsCount--;
                         MessageBox.Show("У вас теперь 3 лекарства!");
+                        gameplay.UpdateStatsDisplay();
                     }
                 }
             }
@@ -325,6 +442,10 @@ namespace Bleat_Buddy
             }
 
             exitBtn.Visible = true;
+        }
+        public void SetGoatReference(Goat goatReference)
+        {
+            this.goat = goatReference;
         }
 
         private void GoatSuitsBtns()
