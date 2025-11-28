@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
+using System.Reflection.Emit;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace Bleat_Buddy
@@ -8,9 +10,9 @@ namespace Bleat_Buddy
     internal class Gameplay : UserControl
     {
         public PictureBox goatSprite;
-        public Timer fallTimer;
-        private Timer nearnessTimer;
-        private Label hpLabel;
+        public System.Windows.Forms.Timer fallTimer;
+        private System.Windows.Forms.Timer nearnessTimer;
+        private System.Windows.Forms.Label hpLabel;
         public Goat goat = new Goat();
         Fire fire = new Fire();
         public PictureBox a = CreatePlatform(0, 991, 750, 150);
@@ -22,7 +24,7 @@ namespace Bleat_Buddy
         private bool isNearBath = false;
 
         private bool isBathAnimating = false;
-        private Timer bathAnimationTimer;
+        private System.Windows.Forms.Timer bathAnimationTimer;
         private int bathAnimationFrame = 0;
         private PictureBox currentBath;
         private Image bath1, bath2, bath3;
@@ -182,7 +184,7 @@ namespace Bleat_Buddy
                     isBathAnimating = true;
                     bathAnimationFrame = 0;
 
-                    bathAnimationTimer = new Timer();
+                    bathAnimationTimer = new System.Windows.Forms.Timer();
                     bathAnimationTimer.Interval = 100;
                     bathAnimationTimer.Tick += BathAnimationTimer_Tick;
                     bathAnimationTimer.Start();
@@ -243,7 +245,7 @@ namespace Bleat_Buddy
         // Таймер для падения
         private void InitializeFallTimer()
         {
-            fallTimer = new Timer();
+            fallTimer = new System.Windows.Forms.Timer();
             fallTimer.Interval = 50;
             fallTimer.Tick += FallTimer_Tick;
         }
@@ -282,12 +284,7 @@ namespace Bleat_Buddy
             goat.UpdatePhysics();
             CheckPlatformCollisions();
             CheckBathNearness();
-
-            if (goatSprite.Top >= 1080 && messCount == 1)
-            {
-                messCount = 0;
-                End();
-            }
+            CheckDeathConditions();
         }
 
 
@@ -318,11 +315,11 @@ namespace Bleat_Buddy
                 goat.isOnGround = false;
             }
 
-            if (goatSprite.Bottom >= 1080 && goat.VerticalVelocity > 0)
-            {
-                goatSprite.Top = 1080 - goatSprite.Height;
-                goat.Land();
-            }
+            //if (goatSprite.Bottom >= 1080 && goat.VerticalVelocity > 0)
+            //{
+            //    goatSprite.Top = 1080 - goatSprite.Height;
+            //    goat.Land();
+            //}
         }
 
         // Проверка нахождения на платформе
@@ -352,7 +349,7 @@ namespace Bleat_Buddy
         {
             fallTimer.Stop();
 
-            Label pauseLbl = new Label();
+            System.Windows.Forms.Label pauseLbl = new System.Windows.Forms.Label();
             Button continueBtn = new Button();
             Button settingsBtn = new Button();
             Button exitBtn = new Button();
@@ -411,6 +408,126 @@ namespace Bleat_Buddy
                 }
             }
         }
+        // Метод смерти
+        public void Death()
+        {
+            fallTimer.Stop();
+            nearnessTimer.Stop();
+            goat.StopEnergyTimer();
+
+            StopBathAnimation();
+
+            // Запускаем анимацию смерти
+            StartDeathAnimation();
+        }
+
+        // Анимация смерти 1
+        private void StartDeathAnimation()
+        {
+            PictureBox deathOverlay = new PictureBox();
+            deathOverlay.Size = new Size(10, 10);
+            deathOverlay.Location = new Point(
+                (this.Width - deathOverlay.Width) / 2,
+                (this.Height - deathOverlay.Height) / 2
+            );
+            deathOverlay.BackColor = Color.Black;
+            deathOverlay.Visible = true;
+
+            Controls.Add(deathOverlay);
+            deathOverlay.BringToFront();
+
+            System.Threading.Thread animationThread = new System.Threading.Thread(() => DeathAnimation(deathOverlay));
+            animationThread.Start();
+        }
+        // Анимация смерти 2
+        private void DeathAnimation(PictureBox deathBox)
+        {
+            int steps = 50;
+            int maxWidth = this.Width;
+            int maxHeight = this.Height;
+
+            for (int i = 1; i <= steps; i++)
+            {
+                this.Invoke(new Action(() =>
+                {
+                    int newWidth = 10 + (maxWidth - 10) * i / steps;
+                    int newHeight = 10 + (maxHeight - 10) * i / steps;
+
+                    deathBox.Size = new Size(newWidth, newHeight);
+                    deathBox.Location = new Point(
+                        (this.Width - newWidth) / 2,
+                        (this.Height - newHeight) / 2
+                    );
+
+                    this.Refresh();
+                }));
+
+                System.Threading.Thread.Sleep(30);
+            }
+
+            System.Threading.Thread.Sleep(500);
+
+            this.Invoke(new Action(() =>
+            {
+                HideGoat();
+
+                PictureBox deathScreen = new PictureBox();
+                deathScreen.Size = new Size(this.Width, this.Height);
+                deathScreen.Location = new Point(0, 0);
+                deathScreen.BackgroundImageLayout = ImageLayout.Stretch;
+                Controls.Add(deathScreen);
+                deathScreen.BringToFront();
+
+                for (int i = 1; i <= 10; i++)
+                {
+                    string imagePath = Path.Combine(projectRoot, "resurse", "death", $"ded_dead{i}.png");
+                    if (File.Exists(imagePath))
+                    {
+                        deathScreen.BackgroundImage = Image.FromFile(imagePath);
+                        this.Refresh();
+                        Thread.Sleep(150);
+                    }
+                }
+
+                Controls.Remove(deathScreen);
+                deathScreen.Dispose();
+
+                DialogResult result = MessageBox.Show("Козлик умер! Возврат в главное меню.", "Смерть",
+                                                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                Controls.Remove(deathBox);
+                deathBox.Dispose();
+
+                messCount = 1;
+                Form1 mainForm = this.Parent as Form1;
+                Controls.Clear();
+
+                if (mainForm != null)
+                {
+                    mainForm.mainMenu();
+                }
+            }));
+        }
+        // Проверка условий смерти
+        private void CheckDeathConditions()
+        {
+            if (goatSprite.Top >= 1080)
+            {
+                if (goat.healthPoint == 1 || goat.isSick)
+                {
+                    Death();
+                    return;
+                }
+                else if (goat.healthPoint > 1)
+                {
+                    goat.healthPoint--;
+                    goatSprite.Location = new Point(90, 870);
+
+                    UpdateStatsDisplay();
+                }
+            }
+        }
+
         // ВРЕМЕННОЕ меню интерфейса
         public void UpdateStatsDisplay()
         {
@@ -426,7 +543,7 @@ namespace Bleat_Buddy
                 hpLabel.Dispose();
             }
 
-            hpLabel = new Label();
+            hpLabel = new System.Windows.Forms.Label();
             hpLabel.Location = new Point(70, 140);
             hpLabel.Size = new Size(350, 60);
             hpLabel.Font = new Font("Segoe Script", 28);

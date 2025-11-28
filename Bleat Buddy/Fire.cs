@@ -113,16 +113,14 @@ namespace Bleat_Buddy
         // Анимация сна
         private void StartSleepAnimation()
         {
-            // Создаем PictureBox для анимации
             PictureBox sleepAnimation = new PictureBox();
-            sleepAnimation.Size = new Size(10, 10); // Начинаем с очень маленького размера
+            sleepAnimation.Size = new Size(10, 10);
             sleepAnimation.Location = new Point(
                 (this.Width - sleepAnimation.Width) / 2,
                 (this.Height - sleepAnimation.Height) / 2
             );
             sleepAnimation.BackgroundImageLayout = ImageLayout.Stretch;
 
-            // Загружаем первую текстуру
             string firstTexturePath = Path.Combine(projectRoot, "resurse", "1dot.png");
             if (File.Exists(firstTexturePath))
             {
@@ -130,13 +128,12 @@ namespace Bleat_Buddy
             }
             else
             {
-                sleepAnimation.BackColor = Color.Black; // Fallback цвет
+                sleepAnimation.BackColor = Color.Black;
             }
 
             Controls.Add(sleepAnimation);
             sleepAnimation.BringToFront();
 
-            // Запускаем анимацию в отдельном потоке
             Thread animationThread = new Thread(() => SleepAnimation(sleepAnimation));
             animationThread.Start();
         }
@@ -174,7 +171,7 @@ namespace Bleat_Buddy
                     this.Refresh();
                 }));
 
-                Thread.Sleep(50); // Задержка между шагами
+                Thread.Sleep(50);
             }
 
             // Ждем немного в полностью развернутом состоянии

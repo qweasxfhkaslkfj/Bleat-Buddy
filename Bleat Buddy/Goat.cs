@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.IO;
 using System.Media;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace Bleat_Buddy
@@ -11,7 +12,7 @@ namespace Bleat_Buddy
         // ToDo: Вывести базовые показатели и возможность их изменения
         PictureBox goat;
         Gameplay gameplay;
-        private Timer energyTimer;
+        private System.Windows.Forms.Timer energyTimer;
         int speed;
         // Текстуры козла
         private static string projectRoot = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\..\"));
@@ -31,6 +32,8 @@ namespace Bleat_Buddy
         // Анимации козла
         // Козёл ходит
         private string lvl_1_goatWalkingRight = Path.Combine(projectRoot, "resurse", "walkingRight", "lvl_1_goatWalking");
+        // Анимация лечения
+        private string lvl_1_goatHealingLeft = Path.Combine(projectRoot, "resurse", "healing");
 
         // Блеяние
         private string audioPath = Path.Combine(projectRoot, "resurse", "bleat.wav");
@@ -44,12 +47,12 @@ namespace Bleat_Buddy
         private const int maxJumps = 2;
 
         // Базовые показатели 
-        public int energyPoint = 70;
+        public int energyPoint = 100;
         public int healthPoint = 3;
         public bool dirty = false;
         public int medCount = 0;
         public int crystalsCount = 1;
-        public int level = 2;
+        public int level = 1;
         public bool isSick = true;
 
         // Конструктор класса
@@ -276,27 +279,107 @@ namespace Bleat_Buddy
         }
 
         // Лечение 
+        // Лечение 
         private void Healing()
         {
-            if (isSick)
+            if (!isSick || medCount < 1)
             {
+                MessageBox.Show("Нет");
+            }
+            else
+            {
+                int x = goat.Location.X;
+                int y = goat.Location.Y;
+
+                switch (level)
+                {
+                    case 1:
+                        HealingAnimation(lvl_1_goatHealingLeft, level);
+                        break;
+                    case 2:
+                        HealingAnimation(lvl_1_goatHealingLeft, level);
+                        break;
+                    case 3:
+                        HealingAnimation(lvl_1_goatHealingLeft, level);
+                        break;
+                    case 4:
+                        HealingAnimation(lvl_1_goatHealingLeft, level);
+                        break;
+                }
+
                 isSick = false;
+                medCount--;
+
                 if (gameplay != null)
                     gameplay.UpdateStatsDisplay();
-
-                MessageBox.Show("Козлик подлечился");
             }
         }
+
+        private void HealingAnimation(string folder, int lvl)
+        {
+            if (gameplay == null) return;
+
+            gameplay.HideGoat();
+
+            PictureBox goatFeed = new PictureBox();
+            switch (lvl)
+            {
+                case 1:
+                    goatFeed.Size = new Size(68, 71);
+                    break;
+                case 2:
+                    goatFeed.Size = new Size(92, 103);
+                    break;
+                case 3:
+                    goatFeed.Size = new Size(92, 123);
+                    break;
+                case 4:
+                    goatFeed.Size = new Size(100, 123);
+                    break;
+            }
+
+            goatFeed.Location = gameplay.goatSprite.Location;
+            goatFeed.BackgroundImageLayout = ImageLayout.Stretch;
+
+            // Добавляем на родительскую форму (gameplay), а не на текущий контрол
+            gameplay.Controls.Add(goatFeed);
+            goatFeed.BringToFront();
+
+            for (int i = 1; i <= 5; i++)
+            {
+                string imagePath = Path.Combine(folder, $"heal{i}.png");
+                if (File.Exists(imagePath))
+                {
+                    // Используем Invoke для потокобезопасности
+                    gameplay.Invoke(new Action(() =>
+                    {
+                        goatFeed.BackgroundImage = Image.FromFile(imagePath);
+                        gameplay.Refresh();
+                    }));
+
+                    Thread.Sleep(100);
+                }
+            }
+
+            // Удаляем анимацию с родительской формы
+            gameplay.Invoke(new Action(() =>
+            {
+                gameplay.Controls.Remove(goatFeed);
+                goatFeed.Dispose();
+                gameplay.ShowGoat();
+            }));
+        }
+
         public void SetGameplayReference(Gameplay game)
         {
-            this.gameplay = game;
+            gameplay = game;
         }
 
         // Минус энергия
         private void InitializeEnergyTimer()
         {
-            energyTimer = new Timer();
-            energyTimer.Interval = 3000;
+            energyTimer = new System.Windows.Forms.Timer();
+            energyTimer.Interval = 4000;
             energyTimer.Tick += EnergyTimer_Tick;
         }
 
@@ -309,12 +392,24 @@ namespace Bleat_Buddy
 
                 if (gameplay != null)
                     gameplay.UpdateStatsDisplay();
-            }
-            else
-            {
-                speed = 5;
+
+                if (energyPoint == 0)
+                {
+                    energyTimer.Stop();
+
+                    if (gameplay != null)
+                    {
+                        gameplay.Invoke(new Action(() =>
+                        {
+                            gameplay.Death();
+                        }));
+                    }
+                    speed = 5;
+                }
             }
         }
+
+
 
         // Метод для запуска таймера
         public void StartEnergyTimer()
